@@ -1,0 +1,95 @@
+#! /usr/bin/env bash
+
+[ "${TRACE}" = 'YES' ] && set -x && : "$0" "$@"
+
+
+stacktrace()
+{
+   local i=1
+   local line
+
+   while line="`caller $i`"
+   do
+      printf "${C_CYAN}%b${C_RESET}\n" "$i: #${line}"
+      ((i++))
+   done
+}
+
+fail()
+{
+   echo "Unexpected " >&2
+   stacktrace >&2
+}
+
+
+ASCENDING=60
+SAME=0
+DESCENDING=62
+
+
+expect_rval()
+{
+   local rval="$1"
+   local expect="$2"
+
+   if [ "${rval}" != "${expect}" ]
+   then
+      echo "Expected $1 but got $2"
+      exit 1
+   fi
+}
+
+
+expect()
+{
+   local expect="$1"
+   local rval="$2"
+
+   if [ "${rval}" != "${expect}" ]
+   then
+      echo "Expected $1 but got $2"
+      exit 1
+   fi
+}
+
+
+
+
+main()
+{
+   MULLE_SEMVER_FLAGS="$@"
+
+   _options_mini_main "$@"
+
+   ${MULLE_SEMVER} numeric-compare -q 0 0
+   expect ${SAME} $?
+
+   ${MULLE_SEMVER} numeric-compare -q 1 0
+   expect ${DESCENDING} $?
+
+   ${MULLE_SEMVER} numeric-compare -q 0 1
+   expect ${ASCENDING} $?
+
+   ${MULLE_SEMVER} numeric-compare -q 999999999999999 999999999999998
+   expect ${DESCENDING} $?
+
+   ${MULLE_SEMVER} numeric-compare 00 0
+   expect 1 $?
+
+   log_info "----- ALL PASSED -----"
+}
+
+
+init()
+{
+   MULLE_BASHFUNCTIONS_LIBEXEC_DIR="`mulle-bashfunctions-env libexec-dir`" || exit 1
+
+   . "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}/mulle-bashfunctions.sh" || exit 1
+
+   MULLE_SEMVER="${MULLE_SEMVER:-${PWD}/../../mulle-semver}"
+}
+
+
+init "$@"
+main "$@"
+

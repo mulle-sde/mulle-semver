@@ -1,0 +1,12 @@
+.DS_Store
+._.DS_Store
+tmp.*
+*.bak
+build/
+build-*.d/
+var/
+*.sublime-workspace
+publisher-info.sh
+mulle-sde.graffle/
+dox/*Wishlist.txt
+research/
