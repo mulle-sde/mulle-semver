@@ -301,7 +301,7 @@ r_parse_prerelease_build()
 #
 # parse it out into:
 #
-#   local _line   [optional]
+#   local _line       [optional]
 #   local _major      [required]
 #   local _minor      [required]
 #   local _patch      [required]
