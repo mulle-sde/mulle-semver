@@ -26,7 +26,7 @@ Compares two arbitrarily large strings by ASCII value.
 mulle-semver numeric-compare 123 124
 ```
 
-Compares two arbitrarily large strings by the numeric value. Except for a
+Compares two arbitrarily large strings by their numeric value. Except for a
 single zero, numbers may not have a leading 0.
 
 
@@ -38,9 +38,6 @@ mulle-semver qualify '>=1.3.0 <1.4.0' 1.2.23
 
 Check a semver version against a semver qualifier. Checkout the documentation on
 [semver ranges](https://www.npmjs.com/package/semver) for what is possible.
-
-Often used qualifiers operators are
-```
 
 
 ### compare
