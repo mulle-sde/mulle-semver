@@ -183,7 +183,8 @@ r_version_triple_parse()
    local v
    local r
    local a
-   # strip of leading 'vV' earlier not here
+
+   # strip of a leading 'vV' earlier, not here
    s="${semver}"
 
    # r remainder after version v

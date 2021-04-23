@@ -83,11 +83,11 @@ semver_qualifier_type_usage()
 Usage:
    ${MULLE_USAGE_NAME} qualifier-type [options] <qualifier>
 
-   Outputs if a semver qualifier might match multiple versions, one
+   Outputs, if a semver qualifier might match multiple versions, one
    version at most, or no versions.
 
    EMPTY  : qualifier is empty (after stripping whitespace)
-   NONE   : not a semver qualifier
+   NO     : not a semver qualifier
    SEMVER : is a semver version (matches one)
    SINGLE : matches a single version at most
    MULTI  : may match multiple versions

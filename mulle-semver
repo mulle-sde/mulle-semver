@@ -59,11 +59,12 @@ Usage:
 
 Commands:
    alphanumeric-compare <alphanumeric> <alphanumeric>
-   compare <semver> <semver>
-   qualify <qualifier> <version>
-   numeric-compare <number> <number>
-   parse <semver>
-   search <qualifier> <version>*
+   compare              <semver> <semver>
+   qualify              <qualifier> <version>
+   qualifier-type       <qualifier>
+   numeric-compare      <number> <number>
+   parse                <semver>
+   search               <qualifier> <version>*
 
 Flags:
 EOF
@@ -103,7 +104,7 @@ main()
 
       case "$1" in
          -h*|--help|help)
-            usage
+            mulle_semver_usage
          ;;
 
          -*)
@@ -175,7 +176,7 @@ main()
          # add commands simply by creating new files
          if [ ! -f "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-${cmd}.sh" ]
          then
-            usage "Unknown command \"${cmd}\""
+            mulle_semver_usage "Unknown command \"${cmd}\""
          fi
          . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-${cmd}.sh"
 

@@ -338,8 +338,8 @@ _r_semver_mergesort_012()
 
 
 #
-# mergesort can be better, if the input is random, we should less comparisons,
-# which are for some reason quite costly
+# mergesort can be better, if the input is random, we should have less
+# comparisons, which are for some reason quite costly
 #
 _r_semver_mergesort()
 {

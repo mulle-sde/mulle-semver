@@ -1,12 +1,21 @@
 # mulle-semver
 
-#### 📍 mulle-semver semantic versioning tool
+#### 📍 semantic version qualification
 
-This is most of npm's [semver]() functionality reimplemented in bash. Other
-it being in bash there are no advantages to mulle-semver over npm semver.
+This is most of npm's [semver](//docs.npmjs.com/cli/v6/using-npm/semver/)
+functionality reimplemented in bash. Besides it being written in bash, there
+are no advantages of mulle-semver over npm semver.
 
 The commandline interface is also different. It's intended function is not
 as a standalone tool, but as a library for [mulle-fetch](//github.com/mulle-)
+
+> #### Example
+>
+> Figure out best (highest) matching version:
+>
+> ```
+> mulle-semver search '>=1.2.0' 1.1.0 1.2.0 1.3.0
+> ```
 
 
 ## Commands
@@ -49,14 +58,14 @@ mulle-semver compare 1.3.0 1.2.23
 Compares two semver qualifiers.
 
 
-### compare
+### parse
 
 
 ```
 mulle-semver parse 1.3.0
 ```
 
-Checks if a version is semver compatible. Outputs it, if yes.
+Checks if a version is semver compatible.
 
 
 ### search

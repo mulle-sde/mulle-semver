@@ -1,4 +1,9 @@
-# Fill it with mulle-env environment --scope project set <key> <value>
+# Edit with:
+#
+#   mulle-env environment --scope project set <key> <value>
+#   mulle-env environment --scope project remove <key>
+#
+
 #
 #
 #
