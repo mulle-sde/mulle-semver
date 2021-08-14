@@ -34,10 +34,10 @@ MULLE_SEMVER_SORT_SH="included"
 #
 # to be able to parse the following functions, we have to turn extglob on here
 #
-shopt -q extglob
+shell_is_extglob_enabled
 MULLE_SEMVER_EXTGLOB_MEMO=$?
 
-shopt -s extglob
+shell_enable_extglob
 
 
 semver_sort_usage()
@@ -503,7 +503,7 @@ r_semver_sort_parsed_versions()
    fi
 
    IFS=$'\n'
-   set -f
+   shell_disable_glob
 
    declare -a _array
    local n
@@ -542,7 +542,7 @@ r_semver_sort_parsed_versions()
    log_debug   "SORTED: ${RVAL}"
    log_verbose "COMPARISONS=${_comparisons}"
 
-   set +f
+   shell_enable_glob
    IFS="${DEFAULT_IFS}"
 }
 
@@ -650,7 +650,7 @@ semver_sort_main()
 
 if [ ${MULLE_SEMVER_EXTGLOB_MEMO} -ne 0 ]
 then
-   shopt -u extglob
+   shell_disable_extglob
 fi
 unset MULLE_SEMVER_EXTGLOB_MEMO
 

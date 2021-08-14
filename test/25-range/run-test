@@ -1,0 +1,122 @@
+#! /usr/bin/env bash
+
+[ "${TRACE}" = 'YES' ] && set -x && : "$0" "$@"
+
+
+expect()
+{
+   local result="$1"
+   local expect="$2"
+
+   if [ "${result}" != "${expect}" ]
+   then
+      internal_fail "Expected \"${expect}\" but got \"${result}\""
+   fi
+}
+
+
+# https://docs.npmjs.com/cli/v6/using-npm/semver/
+test_range_tricky()
+{
+   # unspecified by semver
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.3-beta4' '1.2.3-beta1' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.3-beta4' '1.2.3-beta2' `"
+   expect "${result}" "1.2.3-beta2"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.3-beta4' '1.2.3-beta3' `"
+   expect "${result}" "1.2.3-beta3"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.3-beta4' '1.2.3-beta4' `"
+   expect "${result}" "1.2.3-beta4"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.3-beta4' '1.2.3-beta5' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.3-beta4' '1.2.3' `"
+   expect "${result}" ""
+
+   # beta ranges what to do here ?
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.5-beta4' '1.2.3-beta2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.5-beta4' '1.2.4-beta2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.5-beta4' '1.2.4' `"
+   expect "${result}" "1.2.4"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.5-beta4' '1.2.5-beta2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3-beta2 - 1.2.5-beta4' '1.2.5' `"
+   expect "${result}" ""
+}
+
+test_range()
+{
+   local result
+
+   # 1.2.3 - 2.3.4 := >=1.2.3 <=2.3.4
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3.4' '1.2.2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3.4' '1.2.3' `"
+   expect "${result}" "1.2.3"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3.4' '1.8.48' `"
+   expect "${result}" "1.8.48"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3.4' '1.8.48-beta2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3.4' '2.3.4' `"
+   expect "${result}" "2.3.4"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3.4' '2.3.5' `"
+   expect "${result}" ""
+
+   # 1.2 - 2.3.4 := >=1.2.0 <=2.3.4
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2 - 2.3.4' '1.1.9' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2 - 2.3.4' '1.2.0' `"
+   expect "${result}" "1.2.0"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2 - 2.3.4' '1.8.48' `"
+   expect "${result}" "1.8.48"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2 - 2.3.4' '1.8.48-beta2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2 - 2.3.4' '2.3.4' `"
+   expect "${result}" "2.3.4"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2 - 2.3.4' '2.3.5' `"
+   expect "${result}" ""
+
+   # 1.2.3 - 2.3 := >=1.2.3 <2.4.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3' '1.2.2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3' '1.2.3' `"
+   expect "${result}" "1.2.3"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3' '1.8.48' `"
+   expect "${result}" "1.8.48"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3' '1.8.48-beta2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3' '2.3.9' `"
+   expect "${result}" "2.3.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '1.2.3 - 2.3' '2.4.0' `"
+   expect "${result}" ""
+
+
+}
+
+
+main()
+{
+   MULLE_SEMVER_FLAGS="$@"
+
+   _options_mini_main "$@" && set -x
+
+   test_range_tricky
+   test_range
+
+   log_info "----- ALL PASSED -----"
+}
+
+
+init()
+{
+   MULLE_BASHFUNCTIONS_LIBEXEC_DIR="`mulle-bashfunctions-env libexec-dir`" || exit 1
+
+   . "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}/mulle-bashfunctions.sh" || exit 1
+
+   MULLE_SEMVER="${MULLE_SEMVER:-${PWD}/../../mulle-semver}"
+}
+
+init "$@"
+main "$@"
+

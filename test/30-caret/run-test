@@ -1,0 +1,143 @@
+#! /usr/bin/env bash
+
+[ "${TRACE}" = 'YES' ] && set -x && : "$0" "$@"
+
+
+expect()
+{
+   local result="$1"
+   local expect="$2"
+
+   if [ "${result}" != "${expect}" ]
+   then
+      internal_fail "Expected \"${expect}\" but got \"${result}\""
+   fi
+}
+
+
+# https://docs.npmjs.com/cli/v6/using-npm/semver/
+
+test_caret()
+{
+   local result
+
+   # ^1.2.3 := >=1.2.3 <2.0.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3' '1.2.2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3' '1.2.3' `"
+   expect "${result}" "1.2.3"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3' '1.2.4-beta-1' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3' '1.9.9' `"
+   expect "${result}" "1.9.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3' '2.0.0' `"
+   expect "${result}" ""
+
+   # ^0.2.3 := >=0.2.3 <0.3.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.2.3' '0.2.2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.2.3' '0.2.3' `"
+   expect "${result}" "0.2.3"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.2.3' '0.2.9' `"
+   expect "${result}" "0.2.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.2.3' '0.3.0' `"
+   expect "${result}" ""
+
+   # ^0.0.3 := >=0.0.3 <0.0.4
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0.3' '0.0.2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0.3' '0.0.3' `"
+   expect "${result}" "0.0.3"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0.3' '0.0.4' `"
+   expect "${result}" ""
+
+   # ^1.2.3-beta.2 := >=1.2.3-beta.2 <2.0.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3-beta.2' '1.2.3-beta.1' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3-beta.2' '1.2.3-beta.2' `"
+   expect "${result}" "1.2.3-beta.2"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3-beta.2' '1.2.4-beta.2' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3-beta.2' '1.2.3-beta.9' `"
+   expect "${result}" "1.2.3-beta.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3-beta.2' '1.2.9' `"
+   expect "${result}" "1.2.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.3-beta.2' '2.0.0' `"
+   expect "${result}" ""
+
+   # ^0.0.3-beta := >=0.0.3-beta <0.0.4
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0.3-beta' '0.0.3-beta' `"
+   expect "${result}" "0.0.3-beta"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0.3-beta' '0.0.3-pr.2' `"
+   expect "${result}" "0.0.3-pr.2"
+
+   # ^1.2.x := >=1.2.0 <2.0.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.x' '1.1.9' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.x' '1.2.0' `"
+   expect "${result}" "1.2.0"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.x' '1.9.9' `"
+   expect "${result}" "1.9.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.2.x' '2.0.0' `"
+   expect "${result}" ""
+
+   # ^0.0.x := >=0.0.0 <0.1.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0.x' '0.0.0' `"
+   expect "${result}" "0.0.0"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0.x' '0.0.9' `"
+   expect "${result}" "0.0.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0.x' '0.1.0' `"
+   expect "${result}" ""
+
+   # ^0.0 := >=0.0.0 <0.1.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0' '0.0.0' `"
+   expect "${result}" "0.0.0"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0' '0.0.9' `"
+   expect "${result}" "0.0.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.0' '0.1.0' `"
+   expect "${result}" ""
+
+   # ^1.x := >=1.0.0 <2.0.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.x' '0.9.9' `"
+   expect "${result}" ""
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.x' '1.0.0' `"
+   expect "${result}" "1.0.0"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.x' '1.9.9' `"
+   expect "${result}" "1.9.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^1.x' '2.0.0' `"
+   expect "${result}" ""
+
+   # ^0.x := >=0.0.0 <1.0.0
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.x' '0.0.0' `"
+   expect "${result}" "0.0.0"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.x' '0.9.9' `"
+   expect "${result}" "0.9.9"
+   result="`${MULLE_SEMVER} ${MULLE_SEMVER_FLAGS} search '^0.x' '1.0.0' `"
+   expect "${result}" ""
+}
+
+
+main()
+{
+   MULLE_SEMVER_FLAGS="$@"
+
+   _options_mini_main "$@" && set -x
+
+   test_caret
+
+   log_info "----- ALL PASSED -----"
+}
+
+
+init()
+{
+   MULLE_BASHFUNCTIONS_LIBEXEC_DIR="`mulle-bashfunctions-env libexec-dir`" || exit 1
+
+   . "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}/mulle-bashfunctions.sh" || exit 1
+
+   MULLE_SEMVER="${MULLE_SEMVER:-${PWD}/../../mulle-semver}"
+}
+
+init "$@"
+main "$@"
+

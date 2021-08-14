@@ -34,10 +34,10 @@ MULLE_SEMVER_PARSE_SH="included"
 #
 # to be able to parse the following functions, we have to turn extglob on here
 #
-shopt -q extglob
+shell_is_extglob_enabled
 MULLE_SEMVER_EXTGLOB_MEMO=$?
 
-shopt -s extglob
+shell_enable_extglob
 
 
 semver_parse_usage()
@@ -49,15 +49,23 @@ semver_parse_usage()
 
    cat <<EOF >&2
 Usage:
-   ${MULLE_USAGE_NAME} parse [options] <version>
+   ${MULLE_USAGE_NAME} parse [options] <version>+
 
-   Parse a version in its constituents.
+   Parse versions into their constituents.
+   Use it to transform a list of tags into a list of
+   semver compatible tags, by removing the tags not
+   compatible with semver.
 
 Example:
    ${MULLE_USAGE_NAME} parse 1.2.3-prerelease
 
 Options:
-   -h : this help
+   -h          : this help
+   --raw       : output as shell script (default)
+   --cooked    : print as version number
+   --quiet     : only return parse status (0=OK)
+   --lenient   : use the lenient parser
+
 EOF
    exit 1
 }
@@ -174,7 +182,7 @@ r_version_triple_parse()
    local quiet="$2"
    local lenient="$3" # allows also 1.0 and 1
 
-   if ! shopt -q extglob
+   if ! shell_is_extglob_enabled
    then
       fail "extglob must have been set"
    fi
@@ -638,7 +646,7 @@ semver_prerelease_compare()
 # Do a comparison
 # since bash can't return -1 really, we do
 # ascending   '<' 60
-# same        '=' 61
+# same            0
 # descending  '>' 62
 #
 # coded without variables, because this needs to be fast as its called during
@@ -650,7 +658,7 @@ semver_compare_parsed()
 #
 #   [ $# -ne 8 ] && echo "need 8 parameters">&2 && exit 1
 #
-#   shopt -q extglob || internal_fail "extglob must have been set"
+#   shell_is_extglob_enabled || internal_fail "extglob must have been set"
 #
    local rval
 
@@ -675,32 +683,35 @@ semver_compare_parsed()
 
    #
    # the prerelease is only comparable if versions equal
-   # otherwise a prerelease "poisons"
+   # otherwise a prerelease "poisons". But the poisoning
+   # isn't caught here. We just compare.
    # See: https://docs.npmjs.com/cli/v6/using-npm/semver/
    #
+   # 1.2.3.beta < 1.2.3
+   # 1.2.3.beta-1 < 1.2.3.beta-2
+
    if [ "${4}" != "${8}" ]
    then
-      if [ -z "${4}" ]
+      if [ $rval -eq ${semver_same} ]
       then
-         #
-         # b is set, but a prerelease poisons so its descending
-         # i.e. 0.0.0 > x.x.x-prerelease
-         #
-         rval=${semver_descending}
-      else
-         if [ $rval = ${semver_same} ]
+         if [ -z "${8}" ]
          then
-            # a and b set, so here we can compare
-            semver_prerelease_compare "${4}" "${8}"
-            rval=$?
-         else
             rval=${semver_ascending}
+         else
+            if [ -z "${4}" ]
+            then
+               rval=${semver_descending}
+            else
+               semver_prerelease_compare "${4}" "${8}"
+               rval=$?
+            fi
          fi
       fi
    fi
 
 #   log_fluff "<${a_major}.${a_minor}.${a_patch}-${a_prerelease}> ~ \
 #<${b_major}.${b_minor}.${b_patch}-${b_prerelease}> : ${rval}"
+#   log_debug "semver_compare_parsed returns `semver_output_comparison_result $rval`"
    return $rval
 }
 
@@ -709,7 +720,7 @@ semver_validate_number()
 {
    log_entry "semver_validate_number" "$@"
 
-   shopt -q extglob || internal_fail "extglob must have been set `shopt extglob`"
+   shell_is_extglob_enabled || internal_fail "extglob must have been set `shopt extglob`"
 
    case "$1" in
       0|[1-9]*([0-9]))
@@ -726,7 +737,7 @@ semver_validate_alphanumeric()
 {
    log_entry "semver_validate_alphanumeric" "$@"
 
-   shopt -q extglob || internal_fail "extglob must have been set"
+   shell_is_extglob_enabled || internal_fail "extglob must have been set"
 
    case "$1" in
       +([0-9a-zA-Z-]))
@@ -910,7 +921,7 @@ r_semver_parse_versions()
 
    # now parse all versions
    IFS=$'\n'
-   set -f
+   shell_disable_glob
    for version in ${versions}
    do
       if ! semver_parse "${version}" "${quiet}" "${lenient}"
@@ -933,7 +944,7 @@ _prerelease=${_prerelease};_build=${build}"
       parsed_versions="${RVAL}"
    done
    IFS="${DEFAULT_IFS}"
-   set +f
+   shell_enable_glob
 
    RVAL="${parsed_versions}"
    return $rval
@@ -957,15 +968,14 @@ r_semver_parsed_versions_decriptions()
    local _minor
    local _patch
 
-   # now parse all versions
    IFS=$'\n'
-   set -f
-   if [ "${pretty}" = 'YES' ]
-   then
-      for line in ${parsed_versions}
-      do
-         eval "${line}"
+   shell_disable_glob
+   for line in ${parsed_versions}
+   do
+      eval "${line}"
 
+      if [ "${pretty}" = 'YES' ]
+      then
          s="${_major}.${_minor}.${_patch}"
          if [ ! -z "${_prerelease}" ]
          then
@@ -977,18 +987,14 @@ r_semver_parsed_versions_decriptions()
          fi
          r_add_line "${versions}" "${s}"
          versions="${RVAL}"
-      done
-   else
-      for line in ${parsed_versions}
-      do
-         eval "${line}"
+      else
          r_add_line "${versions}" "${_line}"
          versions="${RVAL}"
-      done
-   fi
+      fi
+   done
 
    IFS="${DEFAULT_IFS}"
-   set +f
+   shell_enable_glob
 
    RVAL="${versions}"
 }
@@ -999,7 +1005,7 @@ semver_parse_main()
    log_entry "semver_parse_main" "$@"
 
    local OPTION_QUIET
-   local OPTION_RAW
+   local OPTION_RAW='YES'
    local OPTION_LENIENT
    local OPTION_PRETTY='YES'
 
@@ -1025,10 +1031,15 @@ semver_parse_main()
             OPTION_RAW='YES'
          ;;
 
+         --cooked)
+            OPTION_RAW='NO'
+         ;;
+
          --pretty)
             OPTION_PRETTY='YES'
          ;;
 
+         # just useful for testing
          --no-pretty)
             OPTION_PRETTY='NO'
          ;;
@@ -1071,6 +1082,7 @@ semver_parse_main()
    fi
 
    r_semver_parsed_versions_decriptions "${parsed_versions}" "${OPTION_PRETTY}"
+
    printf "%s\n" "${RVAL}"
    return $rval
 }
@@ -1152,7 +1164,7 @@ semver_compare_main()
 
 if [ "${MULLE_SEMVER_EXTGLOB_MEMO}" -ne 0 ]
 then
-   shopt -u extglob
+   shell_disable_extglob
 fi
 unset MULLE_SEMVER_EXTGLOB_MEMO
 

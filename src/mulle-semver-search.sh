@@ -34,10 +34,10 @@ MULLE_SEMVER_SEARCH_SH="included"
 #
 # to be able to parse the following functions, we have to turn extglob on here
 #
-shopt -q extglob
+shell_is_extglob_enabled
 MULLE_SEMVER_EXTGLOB_MEMO=$?
 
-shopt -s extglob
+shell_enable_extglob
 
 
 semver_search_usage()
@@ -51,7 +51,7 @@ semver_search_usage()
 Usage:
    ${MULLE_USAGE_NAME} search [options] <qualifier> <version>*
 
-   Find the version that matches the semver qualifier best. If there is only
+   Find the highest version that matches the semver qualifier. If there is only
    one version given and the version is '-', versions will be read from
    standard input.
 
@@ -84,7 +84,7 @@ _r_semver_search_sorted_parsed_versions()
 {
    local qualifier="$1"
 
-   [ -z "${qualifier}" ] && internal_fail "qualifier is empty"
+#   [ -z "${qualifier}" ] && internal_fail "qualifier is empty"
 
    local mid
    local i
@@ -197,6 +197,8 @@ r_semver_search()
 
    eval "${found}"
    RVAL="${_line}"
+
+   return 0
 }
 
 
@@ -250,7 +252,7 @@ semver_search_main()
 
 if [ "${MULLE_SEMVER_EXTGLOB_MEMO}" -ne 0 ]
 then
-   shopt -u extglob
+   shell_disable_extglob
 fi
 unset MULLE_SEMVER_EXTGLOB_MEMO
 

@@ -3,8 +3,9 @@
 #### 📍 semantic version qualification
 
 This is most of npm's [semver](//docs.npmjs.com/cli/v6/using-npm/semver/)
-functionality reimplemented in bash. Besides it being written in bash, there
-are no advantages of mulle-semver over npm semver.
+functionality reimplemented in bash (up to but not including "Functions").
+Besides it being written in bash, there are no advantages of mulle-semver over
+npm semver.
 
 The commandline interface is also different. It's intended function is not
 as a standalone tool, but as a library for [mulle-fetch](//github.com/mulle-)

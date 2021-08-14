@@ -3,41 +3,10 @@
 [ "${TRACE}" = 'YES' ] && set -x && : "$0" "$@"
 
 
-stacktrace()
-{
-   local i=1
-   local line
-
-   while line="`caller $i`"
-   do
-      printf "${C_CYAN}%b${C_RESET}\n" "$i: #${line}"
-      ((i++))
-   done
-}
-
-fail()
-{
-   echo "Unexpected " >&2
-   stacktrace >&2
-}
-
 
 ASCENDING=60
 SAME=0
 DESCENDING=62
-
-
-expect_rval()
-{
-   local rval="$1"
-   local expect="$2"
-
-   if [ "${rval}" != "${expect}" ]
-   then
-      echo "Expected $1 but got $2"
-      exit 1
-   fi
-}
 
 
 expect()
@@ -54,14 +23,12 @@ expect()
 
 
 
-
 main()
 {
    MULLE_SEMVER_FLAGS="$@"
 
-   _options_mini_main "$@"
+   _options_mini_main "$@" && set -x
 
-   set -x
    ${MULLE_SEMVER} alphanumeric-compare -q abc abc
    expect ${SAME} $?
 
