@@ -34,13 +34,7 @@ MULLE_SEMVER_SEARCH_SH="included"
 #
 # to be able to parse the following functions, we have to turn extglob on here
 #
-shell_is_extglob_enabled
-MULLE_SEMVER_EXTGLOB_MEMO=$?
-
-shell_enable_extglob
-
-
-semver_search_usage()
+semver::search::usage()
 {
    if [ "$#" -ne 0 ]
    then
@@ -80,7 +74,7 @@ EOF
 # It's a binary search, we stole and adapted from
 # https://stackoverflow.com/questions/17666007/bash-script-binary-search
 #
-_r_semver_search_sorted_parsed_versions()
+semver::search::_r_search_sorted_parsed_versions()
 {
    local qualifier="$1"
 
@@ -114,7 +108,7 @@ _r_semver_search_sorted_parsed_versions()
       line="${_array[${i}]}"
       eval "${line}" # get into _major etc.
 
-      if _semver_qualify "${qualifier}" \
+      if semver::qualify::_qualify "${qualifier}" \
                          "${_major}" "${_minor}" "${_patch}" "${_prerelease}"
       then
          found="${line}"
@@ -136,44 +130,44 @@ _r_semver_search_sorted_parsed_versions()
 }
 
 
-r_semver_search_parsed_versions()
+semver::search::r_search_parsed_versions()
 {
-   log_entry "r_semver_search_parsed_versions" "$@"
+   log_entry "semver::search::r_search_parsed_versions" "$@"
 
    local qualifier="$1"
    local sorted="$2"
 
-   r_semver_sanitized_qualifier "${qualifier}"
+   semver::qualify::sanitized_qualifier "${qualifier}"
    qualifier="${RVAL}"
 
    declare -a _array
 
    IFS=$'\n' read -r -d '' -a _array <<< "${sorted}"
 
-   _r_semver_search_sorted_parsed_versions "${qualifier}"
+   semver::search::_r_search_sorted_parsed_versions "${qualifier}"
 }
 
 
-r_semver_search()
+semver::search::search()
 {
-   log_entry "r_semver_search" "$@"
+   log_entry "semver::search::search" "$@"
 
    local qualifier="$1"
    local quiet="$2"
    local lenient="$3"
    shift 3
 
-   r_semver_sanitized_qualifier "${qualifier}"
+   semver::qualify::sanitized_qualifier "${qualifier}"
    qualifier="${RVAL}"
 
    local versions
 
-   r_semver_grab_versions semver_search_usage "$@"
+   semver::parse::r_grab_versions semver::search::usage "$@"
    versions="${RVAL}"
 
    local parsed_versions
 
-   r_semver_parse_versions "${versions}" "${quiet}" "${lenient}"
+   semver::parse::parse_versions "${versions}" "${quiet}" "${lenient}"
    parsed_versions="${RVAL}"
 
    local found
@@ -181,8 +175,8 @@ r_semver_search()
    #
    # now that we have all versions in parsed format, we need to sort
    # them
-   r_semver_sort_parsed_versions "${parsed_versions}"
-   if ! r_semver_search_parsed_versions "${qualifier}" "${RVAL}"
+   semver::sort::r_sort_parsed_versions "${parsed_versions}"
+   if ! semver::search::r_search_parsed_versions "${qualifier}" "${RVAL}"
    then
       return 2
    fi
@@ -202,9 +196,9 @@ r_semver_search()
 }
 
 
-semver_search_main()
+semver::search::main()
 {
-   log_entry "semver_search_main" "$@"
+   log_entry "semver::search::main" "$@"
 
    local OPTION_QUIET
    local OPTION_LENIENT
@@ -216,7 +210,7 @@ semver_search_main()
    do
       case "$1" in
          -h*|--help|help)
-            semver_search_usage
+            semver::search::usage
          ;;
 
          -q|--quiet)
@@ -228,7 +222,7 @@ semver_search_main()
          ;;
 
          -*)
-            semver_search_usage "Unknown option \"$1\""
+            semver::search::usage "Unknown option \"$1\""
          ;;
 
          *)
@@ -239,25 +233,19 @@ semver_search_main()
       shift
    done
 
-   [ $# -lt 2 ] && semver_search_usage
+   [ $# -lt 2 ] && semver::search::usage
 
    local qualifier="$1" ; shift
 
-   if ! r_semver_search "${qualifier}" "${OPTION_QUIET}" "${OPTION_LENIENT}" "$@"
+   if ! semver::search::search "${qualifier}" "${OPTION_QUIET}" "${OPTION_LENIENT}" "$@"
    then
       return 2
    fi
    printf "%s\n" "${RVAL}"
 }
 
-if [ "${MULLE_SEMVER_EXTGLOB_MEMO}" -ne 0 ]
-then
-   shell_disable_extglob
-fi
-unset MULLE_SEMVER_EXTGLOB_MEMO
 
-
-semver_search_initialize()
+semver::search::initialize()
 {
    if [ -z "${MULLE_SEMVER_PARSE_SH}" ]
    then
@@ -280,6 +268,6 @@ semver_search_initialize()
    fi
 }
 
-semver_search_initialize
+semver::search::initialize
 
 

@@ -7,8 +7,10 @@ functionality reimplemented in bash (up to but not including "Functions").
 Besides it being written in bash, there are no advantages of mulle-semver over
 npm semver.
 
-The commandline interface is also different. It's intended function is not
-as a standalone tool, but as a library for [mulle-fetch](//github.com/mulle-)
+The commandline interface is also different. It's primary use is not
+as a standalone tool, but as a library for [mulle-fetch](//github.com/mulle-sde/mulle-fetch).
+
+
 
 > #### Example
 >

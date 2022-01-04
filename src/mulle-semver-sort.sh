@@ -34,13 +34,7 @@ MULLE_SEMVER_SORT_SH="included"
 #
 # to be able to parse the following functions, we have to turn extglob on here
 #
-shell_is_extglob_enabled
-MULLE_SEMVER_EXTGLOB_MEMO=$?
-
-shell_enable_extglob
-
-
-semver_sort_usage()
+semver::sort::usage()
 {
    if [ "$#" -ne 0 ]
    then
@@ -78,7 +72,7 @@ EOF
 #
 # the functions here expect an _array array variable in its scope
 #
-_r_semver_qsort_12()
+semver::sort::_r_qsort_12()
 {
    local lo="$1"
    local hi="$2"
@@ -106,7 +100,7 @@ _r_semver_qsort_12()
 
          _comparisons=$((_comparisons + 1))
          #set +x
-         semver_compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
+         semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
          rval="$?"
          #set -x
@@ -131,9 +125,9 @@ _r_semver_qsort_12()
 # Full array given in A, returns i in RVAL2
 # and changed A in RVAL
 #
-_r_semver_qsort_partition()
+semver::sort::_r_qsort_partition()
 {
-   log_entry "_r_semver_qsort_partition" "$@"
+   log_entry "semver::sort::_r_qsort_partition" "$@"
 
    local lo="$1"
    local hi="$2"
@@ -173,7 +167,7 @@ _r_semver_qsort_partition()
          #set +x
          # a is array[i], b is array[ pivot]
          _comparisons=$((_comparisons + 1))
-         semver_compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
+         semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
          rval=$?
          #set -x
@@ -195,7 +189,7 @@ _r_semver_qsort_partition()
 
          #set +x
          _comparisons=$((_comparisons + 1))
-         semver_compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
+         semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
          rval=$?
          #set -x
@@ -222,14 +216,14 @@ _r_semver_qsort_partition()
 }
 
 
-_semver_qsort()
+semver::sort::_qsort()
 {
-   log_entry "_semver_qsort" "$@"
+   log_entry "semver::sort::_qsort" "$@"
 
    local lo="$1"
    local hi="$2"
 
-   if _r_semver_qsort_12 ${lo} ${hi}
+   if semver::sort::_r_qsort_12 ${lo} ${hi}
    then
       return
    fi
@@ -238,7 +232,7 @@ _semver_qsort()
 
    local pivot
 
-   _r_semver_qsort_partition ${lo} ${hi}
+   semver::sort::_r_qsort_partition ${lo} ${hi}
    pivot="${RVAL}"
 
    #
@@ -251,13 +245,13 @@ _semver_qsort()
    #
    if [ ${pivot} -gt ${lo} ]
    then
-      _semver_qsort ${lo} ${pivot}
+      semver::sort::_qsort ${lo} ${pivot}
    fi
 
    pivot=$((pivot + 1))
    if [ ${pivot} -lt ${hi} ]
    then
-      _semver_qsort ${pivot} ${hi}
+      semver::sort::_qsort ${pivot} ${hi}
    fi
 }
 
@@ -266,7 +260,7 @@ _semver_qsort()
 #
 # the functions here expect an _array array variable in its scope
 #
-_r_semver_mergesort_012()
+semver::sort::_r_mergesort_012()
 {
    local array="$1"
    local n="$2"
@@ -317,7 +311,7 @@ _r_semver_mergesort_012()
 
          _comparisons=$((_comparisons + 1))
          # set +x
-         semver_compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
+         semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
          rval="$?"
          # set -x
@@ -341,14 +335,14 @@ _r_semver_mergesort_012()
 # mergesort can be better, if the input is random, we should have less
 # comparisons, which are for some reason quite costly
 #
-_r_semver_mergesort()
+semver::sort::_r_mergesort()
 {
-   log_entry "_r_semver_mergesort" "$@"
+   log_entry "semver::sort::_r_mergesort" "$@"
 
    local array="$1"
    local n="$2"
 
-   if _r_semver_mergesort_012 "${array}" "${n}"
+   if semver::sort::_r_mergesort_012 "${array}" "${n}"
    then
       return
    fi
@@ -363,14 +357,14 @@ _r_semver_mergesort()
    l=$(( n - m))
 
    # sort both smaller arrays
-   _r_semver_mergesort "${array}" ${m}
+   semver::sort::_r_mergesort "${array}" ${m}
    A="${RVAL}"
 
    # this will reset the IFS
    r_lines_in_range "${array}" ${m} ${l}
    IFS=$'\n'
 
-   _r_semver_mergesort "${RVAL}" ${l}
+   semver::sort::_r_mergesort "${RVAL}" ${l}
    B="${RVAL}"
 
 
@@ -448,8 +442,8 @@ _r_semver_mergesort()
 
       _comparisons=$((_comparisons + 1))
       #set +x
-      semver_compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
-                            "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
+      semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
+                                    "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
       rval=$?
       #set -x
 
@@ -475,9 +469,9 @@ _r_semver_mergesort()
 }
 
 
-r_semver_sort_parsed_versions()
+semver::sort::r_sort_parsed_versions()
 {
-   log_entry "r_semver_sort_parsed_versions" "$@"
+   log_entry "semver::sort::r_sort_parsed_versions" "$@"
 
    local array="$1"
    local reverse="$2"
@@ -502,54 +496,54 @@ r_semver_sort_parsed_versions()
       _semver_sort_descending=${semver_ascending}
    fi
 
-   IFS=$'\n'
    shell_disable_glob
+   {
+      declare -a _array
+      local n
 
-   declare -a _array
-   local n
+      IFS=$'\n' read -r -d '' -a _array <<< "${array}"
+      n=${#_array[@]}
 
-   IFS=$'\n' read -r -d '' -a _array <<< "${array}"
-   n=${#_array[@]}
+      # define a few local variables for later benefit
+      local _comparisons
+      local _a_line
+      local _a_major
+      local _a_minor
+      local _a_patch
+      local _a_prerelease
+      local _a_build
 
-   # define a few local variables for later benefit
-   local _comparisons
-   local _a_line
-   local _a_major
-   local _a_minor
-   local _a_patch
-   local _a_prerelease
-   local _a_build
+      local _b_line
+      local _b_major
+      local _b_minor
+      local _b_patch
+      local _b_prerelease
+      local _b_build
 
-   local _b_line
-   local _b_major
-   local _b_minor
-   local _b_patch
-   local _b_prerelease
-   local _b_build
-
-   _comparisons=0
-   if [ "${algorithm}" = 'mergesort' ]
-   then
-      _r_semver_mergesort "${array}" ${n}
-   else
-      # When used in a function, declare makes each name local
-      if [ ${n} -ne 0 ]
+      _comparisons=0
+      if [ "${algorithm}" = 'mergesort' ]
       then
-         _semver_qsort 0 $(( ${n} - 1 ))
+         semver::sort::_r_mergesort "${array}" ${n}
+      else
+         # When used in a function, declare makes each name local
+         if [ ${n} -ne 0 ]
+         then
+            semver::sort::_qsort 0 $(( ${n} - 1 ))
+         fi
+         RVAL="${_array[*]}"
       fi
-      RVAL="${_array[*]}"
-   fi
-   log_debug   "SORTED: ${RVAL}"
-   log_verbose "COMPARISONS=${_comparisons}"
-
+      log_debug   "SORTED: ${RVAL}"
+      log_verbose "COMPARISONS=${_comparisons}"
+   }
    shell_enable_glob
+
    IFS="${DEFAULT_IFS}"
 }
 
 
-semver_sort_main()
+semver::sort::main()
 {
-   log_entry "semver_sort_main" "$@"
+   log_entry "semver::sort::main" "$@"
 
    local OPTION_REVERSE
    local OPTION_QUIET
@@ -563,7 +557,7 @@ semver_sort_main()
    do
       case "$1" in
          -h*|--help|help)
-            semver_sort_usage
+            semver::sort::usage
          ;;
 
          -q|--quiet)
@@ -599,7 +593,7 @@ semver_sort_main()
          ;;
 
          -*)
-            semver_sort_usage "Unknown option \"$1\""
+            semver::sort::usage "Unknown option \"$1\""
          ;;
 
          *)
@@ -610,11 +604,11 @@ semver_sort_main()
       shift
    done
 
-   [ $# -lt 1 ] && semver_sort_usage
+   [ $# -lt 1 ] && semver::sort::usage
 
    local versions
 
-   r_semver_grab_versions semver_sort_usage "$@"
+   semver::parse::r_grab_versions semver::sort::usage "$@"
    versions="${RVAL}"
 
    #
@@ -630,7 +624,7 @@ semver_sort_main()
 
    local parsed_versions
 
-   r_semver_parse_versions "${versions}" "${OPTION_QUIET}" "${OPTION_LENIENT}"
+   semver::parse::parse_versions "${versions}" "${OPTION_QUIET}" "${OPTION_LENIENT}"
    parsed_versions="${RVAL}"
 
    if [ "${OPTION_ALGORITHM}" != "unixsort" ]
@@ -638,24 +632,18 @@ semver_sort_main()
       #
       # now that we have all versions in parsed format, we need to sort
       # them
-      r_semver_sort_parsed_versions "${parsed_versions}" \
-                                    "${OPTION_REVERSE}" \
-                                    "${OPTION_ALGORITHM}"
+      semver::sort::r_sort_parsed_versions "${parsed_versions}" \
+                                          "${OPTION_REVERSE}" \
+                                          "${OPTION_ALGORITHM}"
    fi
 
-   r_semver_parsed_versions_decriptions "${RVAL}" "${OPTION_PRETTY}"
-   echo "${RVAL}"
+   semver::parse::parsed_versions_decriptions "${RVAL}" "${OPTION_PRETTY}"
+   printf "%s\n" "${RVAL}"
 }
 
 
-if [ ${MULLE_SEMVER_EXTGLOB_MEMO} -ne 0 ]
-then
-   shell_disable_extglob
-fi
-unset MULLE_SEMVER_EXTGLOB_MEMO
 
-
-semver_sort_initialize()
+semver::sort::initialize()
 {
    if [ -z "${MULLE_SEMVER_PARSE_SH}" ]
    then
@@ -674,4 +662,4 @@ semver_sort_initialize()
    fi
 }
 
-semver_sort_initialize
+semver::sort::initialize

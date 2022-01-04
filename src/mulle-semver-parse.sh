@@ -40,7 +40,7 @@ MULLE_SEMVER_EXTGLOB_MEMO=$?
 shell_enable_extglob
 
 
-semver_parse_usage()
+semver::parse::usage()
 {
    if [ "$#" -ne 0 ]
    then
@@ -71,7 +71,7 @@ EOF
 }
 
 
-semver_alphanumeric_compare_usage()
+semver::parse::alphanumeric_compare_usage()
 {
    if [ "$#" -ne 0 ]
    then
@@ -95,7 +95,7 @@ EOF
 }
 
 
-semver_numeric_compare_usage()
+semver::parse::numeric_compare_usage()
 {
    if [ "$#" -ne 0 ]
    then
@@ -119,32 +119,8 @@ EOF
 }
 
 
-semver_parse_usage()
-{
-   if [ "$#" -ne 0 ]
-   then
-      log_error "$*"
-   fi
 
-   cat <<EOF >&2
-Usage:
-   ${MULLE_USAGE_NAME} parse [options] <version>
-
-   Parse a version in its constituents.
-
-Example:
-   ${MULLE_USAGE_NAME} parse 1.2.3-prerelease
-
-Options:
-   -h : this help
-   -l : parse leniently (allow 1.x or x, not just 1.x.y)
-   -q : quiet, don't print parse errors
-EOF
-   exit 1
-}
-
-
-semver_compare_usage()
+semver::parse::compare_usage()
 {
    if [ "$#" -ne 0 ]
    then
@@ -174,9 +150,9 @@ EOF
 #   local _minor      [required]
 #   local _patch      [required]
 #
-r_version_triple_parse()
+semver::parse::r_version_triple()
 {
-#   log_entry "r_version_triple_parse" "$@"
+#   log_entry "semver::parse::r_version_triple" "$@"
 
    local semver="$1"
    local quiet="$2"
@@ -240,9 +216,9 @@ r_version_triple_parse()
 }
 
 
-r_parse_prerelease_build()
+semver::parse::r_prerelease_build()
 {
-#   log_entry "r_parse_prerelease_build" "$@"
+#   log_entry "semver::parse::r_prerelease_build" "$@"
 
    local s="$1"
    local quiet="$2"
@@ -317,9 +293,9 @@ r_parse_prerelease_build()
 #   local _prerelease [optional]
 #   local _build      [optional]
 #
-semver_parse()
+semver::parse::parse()
 {
-   log_entry "semver_parse" "$@"
+   log_entry "semver::parse::parse" "$@"
 
    local semver="$1"
    local quiet="$2"
@@ -334,13 +310,13 @@ semver_parse()
       ;;
    esac
 
-   if ! r_version_triple_parse "${s}" "${quiet}" "${lenient}"
+   if ! semver::parse::r_version_triple "${s}" "${quiet}" "${lenient}"
    then
       return 1
    fi
    s="${RVAL}"
 
-   if ! r_parse_prerelease_build "${s}" "${quiet}"
+   if ! semver::parse::r_prerelease_build "${s}" "${quiet}"
    then
       return 1
    fi
@@ -364,30 +340,30 @@ semver_parse()
 }
 
 
-r_semver_parsed_version_description()
+#semver::parse::r_version_description()
+#{
+#   local v_prefix="$1"
+#   local major="$2"
+#   local minor="$3"
+#   local patch="$4"
+#   local prerelease="$5"
+#   local build="$6"
+#
+#   RVAL="${v_prefix}${major}.${minor}.${patch}"
+#   if [ ! -z "${prerelease}" ]
+#   then
+#      RVAL="${RVAL}-${prerelease}"
+#   fi
+#   if [ ! -z "${build}" ]
+#   then
+#      RVAL="${RVAL}+${build}"
+#   fi
+#}
+
+
+semver::parse::r_increment_numeric()
 {
-   local v_prefix="$1"
-   local major="$2"
-   local minor="$3"
-   local patch="$4"
-   local prerelease="$5"
-   local build="$6"
-
-   RVAL="${v_prefix}${major}.${minor}.${patch}"
-   if [ ! -z "${prerelease}" ]
-   then
-      RVAL="${RVAL}-${prerelease}"
-   fi
-   if [ ! -z "${build}" ]
-   then
-      RVAL="${RVAL}+${build}"
-   fi
-}
-
-
-r_semver_increment_numeric()
-{
-   log_entry "r_semver_increment_numeric" "$@"
+   log_entry "semver::parse::r_increment_numeric" "$@"
 
    local a="$1"
 
@@ -442,9 +418,9 @@ semver_descending=62 # '>'
 #
 # number cant start with 0 if its not 0
 #
-semver_numeric_compare()
+semver::parse::numeric_compare()
 {
-#   log_entry "semver_numeric_compare" "$@"
+#   log_entry "semver::parse::numeric_compare" "$@"
 #
    local a="$1"
    local b="$2"
@@ -511,9 +487,9 @@ semver_numeric_compare()
 #
 # a or b can't be wildcards, but can be empty
 #
-semver_alphanumeric_compare()
+semver::parse::alphanumeric_compare()
 {
-#   log_entry "semver_alphanumeric_compare" "$@"
+#   log_entry "semver::parse::alphanumeric_compare" "$@"
 
    local a="$1"
    local b="$2"
@@ -549,9 +525,9 @@ semver_alphanumeric_compare()
 #
 # a_part or b_part can't be wildcards
 #
-semver_prerelease_part_compare()
+semver::parse::prerelease_part_compare()
 {
-   log_entry "semver_prerelease_part_compare" "$@"
+   log_entry "semver::parse::prerelease_part_compare" "$@"
 
    local a_part="$1"
    local b_part="$2"
@@ -569,7 +545,7 @@ semver_prerelease_part_compare()
       +([0-9]))
          case "${b_part}" in
             +([0-9]))
-               semver_numeric_compare "${a_part}" "${b_part}"
+               semver::parse::numeric_compare "${a_part}" "${b_part}"
                return $?
             ;;
          esac
@@ -587,7 +563,7 @@ semver_prerelease_part_compare()
       ;;
    esac
 
-   semver_alphanumeric_compare "${a_part}" "${b_part}"
+   semver::parse::alphanumeric_compare "${a_part}" "${b_part}"
    return $?
 }
 
@@ -595,9 +571,9 @@ semver_prerelease_part_compare()
 #
 # wildcards not specifiable for prerelease
 #
-semver_prerelease_compare()
+semver::parse::prerelease_compare()
 {
-   log_entry "semver_prerelease_compare" "$@"
+   log_entry "semver::parse::prerelease_compare" "$@"
 
    local a_prerelease="$1"
    local b_prerelease="$2"
@@ -625,7 +601,7 @@ semver_prerelease_compare()
       b_remainder="${b_remainder#${b_part}}"
       b_remainder="${b_remainder#.}"
 
-      semver_prerelease_part_compare "${a_part}" "${b_part}"
+      semver::parse::prerelease_part_compare "${a_part}" "${b_part}"
       rval=$?
 
       if [ "${rval}" != ${semver_same} ]
@@ -652,9 +628,9 @@ semver_prerelease_compare()
 # coded without variables, because this needs to be fast as its called during
 # sorting (especially if using quicksort, which compares a lot)
 #
-semver_compare_parsed()
+semver::parse::compare_parsed()
 {
-#   log_entry "semver_compare_parsed" "$@"
+#   log_entry "semver::parse::compare_parsed" "$@"
 #
 #   [ $# -ne 8 ] && echo "need 8 parameters">&2 && exit 1
 #
@@ -665,17 +641,17 @@ semver_compare_parsed()
    rval=${semver_same}
    if [ "${1}" != "${5}" ]
    then
-      semver_numeric_compare "${1}" "${5}"
+      semver::parse::numeric_compare "${1}" "${5}"
       rval=$?
    else
       if [ "${2}" != "${6}" ]
       then
-         semver_numeric_compare "${2}" "${6}"
+         semver::parse::numeric_compare "${2}" "${6}"
          rval=$?
       else
          if [ "${3}" != "${7}" ]
          then
-            semver_numeric_compare "${3}" "${7}"
+            semver::parse::numeric_compare "${3}" "${7}"
             rval=$?
          fi
       fi
@@ -702,7 +678,7 @@ semver_compare_parsed()
             then
                rval=${semver_descending}
             else
-               semver_prerelease_compare "${4}" "${8}"
+               semver::parse::prerelease_compare "${4}" "${8}"
                rval=$?
             fi
          fi
@@ -711,14 +687,14 @@ semver_compare_parsed()
 
 #   log_fluff "<${a_major}.${a_minor}.${a_patch}-${a_prerelease}> ~ \
 #<${b_major}.${b_minor}.${b_patch}-${b_prerelease}> : ${rval}"
-#   log_debug "semver_compare_parsed returns `semver_output_comparison_result $rval`"
+#   log_debug "semver::parse::compare_parsed returns `semver::parse::output_comparison_result $rval`"
    return $rval
 }
 
 
-semver_validate_number()
+semver::parse::validate_number()
 {
-   log_entry "semver_validate_number" "$@"
+   log_entry "semver::parse::validate_number" "$@"
 
    shell_is_extglob_enabled || internal_fail "extglob must have been set `shopt extglob`"
 
@@ -733,9 +709,9 @@ semver_validate_number()
 }
 
 
-semver_validate_alphanumeric()
+semver::parse::validate_alphanumeric()
 {
-   log_entry "semver_validate_alphanumeric" "$@"
+   log_entry "semver::parse::validate_alphanumeric" "$@"
 
    shell_is_extglob_enabled || internal_fail "extglob must have been set"
 
@@ -750,7 +726,7 @@ semver_validate_alphanumeric()
 }
 
 
-semver_output_comparison_result()
+semver::parse::output_comparison_result()
 {
    local rval="$1"
    local quiet="$2"
@@ -775,9 +751,9 @@ semver_output_comparison_result()
 }
 
 
-semver_alphanumeric_compare_main()
+semver::parse::alphanumeric_compare_main()
 {
-   log_entry "semver_alphanumeric_compare_main" "$@"
+   log_entry "semver::parse::alphanumeric_compare_main" "$@"
 
    #
    # handle options
@@ -786,7 +762,7 @@ semver_alphanumeric_compare_main()
    do
       case "$1" in
          -h*|--help|help)
-            semver_alphanumeric_compare_usage
+            semver::parse::alphanumeric_compare_usage
          ;;
 
          -q|--quiet)
@@ -794,7 +770,7 @@ semver_alphanumeric_compare_main()
          ;;
 
          -*)
-            semver_alphanumeric_compare_usage "Unknown option \"$1\""
+            semver::parse::alphanumeric_compare_usage "Unknown option \"$1\""
          ;;
 
          *)
@@ -805,19 +781,19 @@ semver_alphanumeric_compare_main()
       shift
    done
 
-   [ $# -eq 2 ] || semver_alphanumeric_compare_usage
+   [ $# -eq 2 ] || semver::parse::alphanumeric_compare_usage
 
-   semver_validate_alphanumeric "$1"
-   semver_validate_alphanumeric "$2"
+   semver::parse::validate_alphanumeric "$1"
+   semver::parse::validate_alphanumeric "$2"
 
-   semver_alphanumeric_compare "$@"
-   semver_output_comparison_result $? "${OPTION_QUIET}"
+   semver::parse::alphanumeric_compare "$@"
+   semver::parse::output_comparison_result $? "${OPTION_QUIET}"
 }
 
 
-semver_numeric_compare_main()
+semver::parse::numeric_compare_main()
 {
-   log_entry "semver_numeric_compare_main" "$@"
+   log_entry "semver::parse::numeric_compare_main" "$@"
 
    #
    # handle options
@@ -826,7 +802,7 @@ semver_numeric_compare_main()
    do
       case "$1" in
          -h*|--help|help)
-            semver_numeric_compare_usage
+            semver::parse::numeric_compare_usage
          ;;
 
          -q|--quiet)
@@ -834,7 +810,7 @@ semver_numeric_compare_main()
          ;;
 
          -*)
-            semver_numeric_compare_usage "Unknown option \"$1\""
+            semver::parse::numeric_compare_usage "Unknown option \"$1\""
          ;;
 
          *)
@@ -845,21 +821,21 @@ semver_numeric_compare_main()
       shift
    done
 
-   [ $# -ne 2 ] && semver_numeric_compare_usage
+   [ $# -ne 2 ] && semver::parse::numeric_compare_usage
 
-   semver_validate_number "$1"
-   semver_validate_number "$2"
+   semver::parse::validate_number "$1"
+   semver::parse::validate_number "$2"
 
-   semver_numeric_compare "$@"
-   semver_output_comparison_result $? "${OPTION_QUIET}"
+   semver::parse::numeric_compare "$@"
+   semver::parse::output_comparison_result $? "${OPTION_QUIET}"
 }
 
 
-r_semver_grab_versions()
+semver::parse::r_grab_versions()
 {
-   log_entry "r_semver_grab_versions" "$@"
+   log_entry "semver::parse::r_grab_versions" "$@"
 
-   local usage="${1:-semver_parse_usage}" ; shift
+   local usage="${1:-semver::parse::usage}" ; shift
 
    local versions
 
@@ -898,9 +874,9 @@ r_semver_grab_versions()
 #         1 all wrong
 #         2 some OK
 #
-r_semver_parse_versions()
+semver::parse::parse_versions()
 {
-   log_entry "r_semver_parse_versions" "$@"
+   log_entry "semver::parse::parse_versions" "$@"
 
    local versions="$1"
    local quiet="$2"
@@ -920,17 +896,15 @@ r_semver_parse_versions()
    rval=0
 
    # now parse all versions
-   IFS=$'\n'
-   shell_disable_glob
-   for version in ${versions}
-   do
-      if ! semver_parse "${version}" "${quiet}" "${lenient}"
+   .foreachline version in ${versions}
+   .do
+      if ! semver::parse::parse "${version}" "${quiet}" "${lenient}"
       then
          if [ $rval -eq 0 ]
          then
             rval=1
          fi
-         continue
+         .continue
       fi
 
       if [ $rval -eq 1 ]
@@ -942,18 +916,16 @@ r_semver_parse_versions()
 _prerelease=${_prerelease};_build=${build}"
       r_add_line "${parsed_versions}" "${line}"
       parsed_versions="${RVAL}"
-   done
-   IFS="${DEFAULT_IFS}"
-   shell_enable_glob
+   .done
 
    RVAL="${parsed_versions}"
    return $rval
 }
 
 
-r_semver_parsed_versions_decriptions()
+semver::parse::parsed_versions_decriptions()
 {
-   log_entry "r_semver_parsed_versions_decriptions" "$@"
+   log_entry "semver::parse::parsed_versions_decriptions" "$@"
 
    local parsed_versions="$1"
    local pretty="$2"
@@ -968,10 +940,8 @@ r_semver_parsed_versions_decriptions()
    local _minor
    local _patch
 
-   IFS=$'\n'
-   shell_disable_glob
-   for line in ${parsed_versions}
-   do
+   .foreachline line in ${parsed_versions}
+   .do
       eval "${line}"
 
       if [ "${pretty}" = 'YES' ]
@@ -991,18 +961,15 @@ r_semver_parsed_versions_decriptions()
          r_add_line "${versions}" "${_line}"
          versions="${RVAL}"
       fi
-   done
-
-   IFS="${DEFAULT_IFS}"
-   shell_enable_glob
+   .done
 
    RVAL="${versions}"
 }
 
 
-semver_parse_main()
+semver::parse::main()
 {
-   log_entry "semver_parse_main" "$@"
+   log_entry "semver::parse::main" "$@"
 
    local OPTION_QUIET
    local OPTION_RAW='YES'
@@ -1016,7 +983,7 @@ semver_parse_main()
    do
       case "$1" in
          -h*|--help|help)
-            semver_parse_usage
+            semver::parse::usage
          ;;
 
          -q|--quiet)
@@ -1049,7 +1016,7 @@ semver_parse_main()
          ;;
 
          -*)
-            semver_parse_usage "Unknown option \"$1\""
+            semver::parse::usage "Unknown option \"$1\""
          ;;
 
          *)
@@ -1062,10 +1029,10 @@ semver_parse_main()
 
    local versions
 
-   r_semver_grab_versions semver_parse_usage "$@"
+   semver::parse::r_grab_versions semver::parse::usage "$@"
    versions="${RVAL}"
 
-   r_semver_parse_versions "${versions}" "${OPTION_QUIET}" "${OPTION_LENIENT}"
+   semver::parse::parse_versions "${versions}" "${OPTION_QUIET}" "${OPTION_LENIENT}"
    rval=$?
 
    parsed_versions="${RVAL}"
@@ -1081,16 +1048,16 @@ semver_parse_main()
       return $rval
    fi
 
-   r_semver_parsed_versions_decriptions "${parsed_versions}" "${OPTION_PRETTY}"
+   semver::parse::parsed_versions_decriptions "${parsed_versions}" "${OPTION_PRETTY}"
 
    printf "%s\n" "${RVAL}"
    return $rval
 }
 
 
-semver_compare_main()
+semver::parse::compare_main()
 {
-   log_entry "semver_compare_main" "$@"
+   log_entry "semver::parse::compare_main" "$@"
 
    local OPTION_QUIET
    local OPTION_LENIENT
@@ -1108,7 +1075,7 @@ semver_compare_main()
    do
       case "$1" in
          -h*|--help|help)
-            semver_compare_usage
+            semver::parse::compare_usage
          ;;
 
          -q|--quiet)
@@ -1120,7 +1087,7 @@ semver_compare_main()
          ;;
 
          -*)
-            semver_compare_usage "Unknown option \"$1\""
+            semver::parse::compare_usage "Unknown option \"$1\""
          ;;
 
          *)
@@ -1131,7 +1098,7 @@ semver_compare_main()
       shift
    done
 
-   if ! semver_parse "$1" "${OPTION_QUIET}" "${OPTION_LENIENT}"
+   if ! semver::parse::parse "$1" "${OPTION_QUIET}" "${OPTION_LENIENT}"
    then
       return 1
    fi
@@ -1141,7 +1108,7 @@ semver_compare_main()
    local a_patch="${_patch}"
    local a_prerelease="${_prerelease}"
 
-   if ! semver_parse "$2"
+   if ! semver::parse::parse "$2"
    then
       return 1
    fi
@@ -1153,10 +1120,10 @@ semver_compare_main()
 
    local rval
 
-   semver_compare_parsed \
+   semver::parse::compare_parsed \
        "${a_major}" "${a_minor}" "${a_patch}" "${a_prerelease}" \
        "${b_major}" "${b_minor}" "${b_patch}" "${b_prerelease}"
-   semver_output_comparison_result $? "${OPTION_QUIET}"
+   semver::parse::output_comparison_result $? "${OPTION_QUIET}"
 }
 
 

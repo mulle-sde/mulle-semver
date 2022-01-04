@@ -32,77 +32,77 @@
 [ "${TRACE}" = 'YES' -o "${MULLE_SEMVER_TRACE}" = 'YES' ] && set -x && : "$0" "$@"
 
 
-####
-#
-# Prelude to be placed at top of each script. Rerun this script either in
-# bash or zsh, if not already running in either (which can happen!)
-# Allows script to run on systems that either have bash (linux) or
-# zsh (macOS) only by default.
+MULLE_EXECUTABLE_VERSION="1.0.0"
 
+
+###########################################################################
+###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
+###########################################################################
+# #
+# # PRELUDE - Standard startup code for loading mulle-bashfunctions
+# #
+###
+
+#
+# Figure out MULLE_BASHFUNCTIONS_LIBEXEC_DIR on this machine if needed.
+#
+if [ -z "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}" ]
+then
+   MULLE_BASHFUNCTIONS_LIBEXEC_DIR="`mulle-bashfunctions libexec-dir`" || exit 1
+   export MULLE_BASHFUNCTIONS_LIBEXEC_DIR
+fi
+
+#
+# The booter reruns the executable either with bash or zsh, whatever the
+# system provides. On the second run --no-auto-shell will be set first.
+#
 if [ "$1" != --no-auto-shell ]
 then
-   if [ -z "${BASH_VERSION}" -a -z "${ZSH_VERSION}" ]
-   then
-      exe_shell="`command -v "bash" `"
-      exe_shell="${exe_shell:-`command -v "zsh" `}"
-
-      script="$0"
-
-      #
-      # Quote incoming arguments for shell expansion
-      #
-      args=""
-      for arg in "$@"
-      do
-         # True bourne sh doesn't know ${a//b/c} and <<<
-         case "${arg}" in
-            *\'*)
-               # Use cat instead of echo to avoid possible echo -n
-               # problems. Escape single quotes in string.
-               arg="`cat <<EOF | sed -e s/\'/\'\\\"\'\\\"\'/g
-${arg}
-EOF
-`"
-            ;;
-         esac
-         if [ -z "${args}" ]
-         then
-            args="'${arg}'"
-         else
-            args="${args} '${arg}'"
-         fi
-      done
-
-      #
-      # bash/zsh will use arg after -c <arg> as $0, convenient!
-      #
-
-      exec "${exe_shell:-bash}" -c ". ${script} --no-auto-shell ${args}" "${script}"
-   fi
-   if [ ! -z "${BASH_VERSION}" ]
-   then
-      set +o posix
-   fi
+   . "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}/mulle-boot.sh" || exit 1
 else
    shift    # get rid of --no-auto-shell
 fi
 
+###
+# # Now we are in bash or zsh...
+# #
+###########################################################################
+###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
+###########################################################################
+
+MULLE_EXECUTABLE="${BASH_SOURCE[0]:-${(%):-%x}}"
 
 #
-# Main script to follow, runs now either in zsh or bash
+# Include mulle-bashfunctions.sh         : default functions
+#         mulle-bashfunctions-none.sh    : almost no functions
+#         mulle-bashfunctions-minimal.sh : few functions for basic scripts
+#         mulle-bashfunctions-all.sh     : everything, even obscure functions
 #
-####
+# Do this first to get aliases
+#
+. "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}/mulle-bashfunctions-minimal.sh" || exit 1
 
-MULLE_EXECUTABLE_VERSION="0.0.1"
+
+#
+# Determine location of own libexec directory. Which is `src` in development
+# and ../libexec when deployed. MULLE_EXECUTABLE needs to be defined for this.
+#
+
+if [ -z "${MULLE_SEMVER_LIBEXEC_DIR}" ]
+then
+   r_get_libexec_dir "${MULLE_EXECUTABLE}" "mulle-semver" "mulle-semver-parse.sh"
+   MULLE_SEMVER_LIBEXEC_DIR="${RVAL}"
+fi
 
 
-mulle_semver_print_flags()
+
+semver::print_flags()
 {
    options_technical_flags_usage "       : "
 }
 
 
-mulle_semver_usage()
+semver::usage()
 {
    [ $# -ne 0 ] && log_error "$*"
 
@@ -124,13 +124,13 @@ Commands:
    (use <command> --help for usage information)
 Flags:
 EOF
-   mulle_semver_print_flags | LC_ALL=C sort >&2
+   semver::print_flags | LC_ALL=C sort >&2
 
    exit 1
 }
 
 
-main()
+semver::main()
 {
    local MULLE_FLAG_MAGNUM_FORCE='NO'
 
@@ -160,11 +160,11 @@ main()
 
       case "$1" in
          -h*|--help|help)
-            mulle_semver_usage
+            semver::usage
          ;;
 
          -*)
-            "mulle_semver_usage" "Unknown option \"$1\""
+            "semver::usage" "Unknown option \"$1\""
          ;;
 
          *)
@@ -177,7 +177,7 @@ main()
 
    options_setup_trace "${MULLE_TRACE}" && set -x
 
-   shell_enable_extglob
+   # ui! ???
    shell_disable_glob
 
    local cmd="$1"
@@ -189,138 +189,38 @@ main()
          # shellcheck source=src/mulle-semver-parse.sh
          . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-parse.sh"
 
-         semver_${cmd//-/_}_main "$@"
+         semver::parse::${cmd//-/_}_main "$@"
       ;;
 
-      'qualify')
-         # shellcheck source=src/mulle-semver-qualify.sh
-         . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-qualify.sh"
+      'qualify'|'search'|'sort')
+         # shellcheck source=src/mulle-semver-sort.sh
+         . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-${cmd}.sh"
 
-         semver_qualify_main "$@"
+         semver::${cmd}::main "$@"
       ;;
 
       'qualifier-type')
          # shellcheck source=src/mulle-semver-qualify.sh
          . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-qualify.sh"
 
-         semver_qualifier_type_main "$@"
+         semver::qualify::qualifier_type_main "$@"
       ;;
 
-      'sort')
-         # shellcheck source=src/mulle-semver-sort.sh
-         . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-sort.sh"
 
-         semver_sort_main "$@"
+      'libexec-dir')
+         printf "%s\n" "${MULLE_SEMVER_LIBEXEC_DIR}"
       ;;
 
-      'search')
-         # shellcheck source=src/mulle-semver-search.sh
-         . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-search.sh"
-
-         semver_search_main "$@"
-      ;;
 
       'version')
          printf "%s\n" "${MULLE_EXECUTABLE_VERSION}"
       ;;
 
       "")
-         mulle_semver_usage
-      ;;
-
-      *)
-         # add commands simply by creating new files
-         if [ ! -f "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-${cmd}.sh" ]
-         then
-            mulle_semver_usage "Unknown command \"${cmd}\""
-         fi
-         . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-${cmd}.sh"
-
-         "mulle_semver_${cmd}_main" "$@"
+         semver::usage
       ;;
    esac
 }
 
 
-########
-###
-### INIT
-###
-_fatal()
-{
-   echo "$0 fatal error: $*" >&2
-   exit 1
-}
-
-_init()
-{
-   # leading backslash ? looks like we're getting called from
-   # mingw via a .BAT or so
-   #
-   case "$PATH" in
-      '\\'*)
-         PATH="${PATH//\\/\/}"
-      ;;
-   esac
-
-   if [ -z "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}" ]
-   then
-      MULLE_BASHFUNCTIONS_LIBEXEC_DIR="`mulle-bashfunctions-env libexec-dir 2> /dev/null`"
-      if [ -z "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}" ]
-      then
-         if [ -z "`command -v 'mulle-bashfunctions-env'`" ]
-         then
-            _fatal "mulle-bashfunctions-env not installed"
-         else
-            _fatal "Could not find libexec-dir of mulle-bashfunctions-env"
-         fi
-         exit 1
-      fi
-   fi
-
-      # shellcheck source=../mulle-bashfunctions/src/mulle-bashfunctions.sh
-   . "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}/mulle-bashfunctions.sh" ||
-      _fatal "failed to load bashfunctions from ${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}"
-   ### *** ###
-   if [ -z "${MULLE_SEMVER_LIBEXEC_DIR}" ]
-   then
-      r_get_libexec_dir "${MULLE_EXECUTABLE}" "mulle-semver" "mulle-semver-parse.sh"
-      MULLE_SEMVER_LIBEXEC_DIR="${RVAL}"
-   fi
-
-   #
-   # commands with minimal trap setup
-   #
-   if [ $# -eq 1 ]
-   then
-      case "${1}" in
-         libexec-dir|library-path)
-            printf "%s\n" "${MULLE_SEMVER_LIBEXEC_DIR}"
-            exit 0
-         ;;
-
-         version)
-            printf "%s\n" "${MULLE_EXECUTABLE_VERSION}"
-            exit 0
-         ;;
-      esac
-   fi
-
-   #  set -e # more pain then gain in the end
-   #  set -u # doesn't work with my style
-
-   shell_enable_pipefail
-   shell_enable_extglob
-
-   call_main "${MULLE_SEMVER_FLAGS}" "$@"
-}
-
-###
-### INIT
-###
-########
-
-MULLE_EXECUTABLE="${MULLE_EXECUTABLE:-${BASH_SOURCE[0]:-${(%):-%x}}}"
-
-_init "$@"
-
+call_with_flags "semver::main" "${MULLE_SEMVER_FLAGS}" "$@"

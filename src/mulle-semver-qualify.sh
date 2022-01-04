@@ -34,13 +34,10 @@ MULLE_SEMVER_QUALIFY_SH="included"
 #
 # to be able to parse the following functions, we have to turn extglob on here
 #
-shell_is_extglob_enabled
-MULLE_SEMVER_EXTGLOB_MEMO=$?
-
-shell_enable_extglob
+shell_is_extglob_enabled || _fail "extglob needs to be on"
 
 
-semver_qualify_usage()
+semver::qualify::usage()
 {
    if [ "$#" -ne 0 ]
    then
@@ -72,7 +69,7 @@ EOF
 }
 
 
-semver_qualifier_type_usage()
+semver::qualify::qualifier_type_usage()
 {
    if [ "$#" -ne 0 ]
    then
@@ -116,9 +113,9 @@ EOF
 #
 # missing parts are substituted with '0' by default
 #
-r_version_triple_parse_lenient()
+semver::qualify::r_version_triple_parse_lenient()
 {
-#  log_entry "r_version_triple_parse_lenient" "$@"
+#  log_entry "semver::qualify::r_version_triple_parse_lenient" "$@"
 
    local s="$1"
    local substitute="${2:-0}"
@@ -174,9 +171,9 @@ r_version_triple_parse_lenient()
 #   local _build      [optional]
 #
 # substitute is 0 by default, sometimes '*' is convenient though
-semver_parse_lenient()
+semver::qualify::parse_lenient()
 {
-   log_entry "semver_parse_lenient" "$@"
+   log_entry "semver::qualify::parse_lenient" "$@"
 
    local semver="$1"
    local substitute="$2"
@@ -192,10 +189,10 @@ semver_parse_lenient()
       ;;
    esac
 
-   r_version_triple_parse_lenient "${s}" "${substitute}"
+   semver::qualify::r_version_triple_parse_lenient "${s}" "${substitute}"
    s="${RVAL}"
 
-   r_parse_prerelease_build "${s}"
+   semver::parse::r_prerelease_build "${s}"
    s="${RVAL}"
 
    if [ ! -z "${s}" ]
@@ -220,9 +217,9 @@ semver_parse_lenient()
 # avoid reparsing stuff so, we reuse _underscore variables here
 # though it's a bit more wordy
 #
-_semver_tilde_op_parsed()
+semver::qualify::_tilde_op_parsed()
 {
-   log_entry "_semver_tilde_op_parsed" ${_major} ${_minor} ${_patch} ${_prerelease} "$@"
+   log_entry "semver::qualify::_tilde_op_parsed" ${_major} ${_minor} ${_patch} ${_prerelease} "$@"
 
    [ $# -eq 4 ] || exit 1
 
@@ -255,15 +252,15 @@ _semver_tilde_op_parsed()
       _minor=0
       _patch=0
       _prerelease=""
-      if ! _semver_op_parsed ">=" "$@"
+      if ! semver::qualify::_op_parsed ">=" "$@"
       then
          return 1
       fi
 
-      r_semver_increment_numeric "${major}"
+      semver::parse::r_increment_numeric "${major}"
       _major="${RVAL}"
 
-      _semver_op_parsed "<" "$@"
+      semver::qualify::_op_parsed "<" "$@"
       return $?
    fi
 
@@ -280,17 +277,17 @@ _semver_tilde_op_parsed()
       _prerelease="${prerelease}"
    fi
 
-   if ! _semver_op_parsed ">=!" "$@"
+   if ! semver::qualify::_op_parsed ">=!" "$@"
    then
       return 1
    fi
 
-   r_semver_increment_numeric "${minor}"
+   semver::parse::r_increment_numeric "${minor}"
    _minor="${RVAL}"
    _patch=0
    _prerelease=""
 
-   _semver_op_parsed "<" "$@"
+   semver::qualify::_op_parsed "<" "$@"
    case $?  in
       1) # poisoned is OK here
          return 1
@@ -300,9 +297,9 @@ _semver_tilde_op_parsed()
 }
 
 
-_semver_caret_op_parsed()
+semver::qualify::_caret_op_parsed()
 {
-   log_entry "_semver_caret_op_parsed" ${_major} ${_minor} ${_patch} ${_prerelease} "$@"
+   log_entry "semver::qualify::_caret_op_parsed" ${_major} ${_minor} ${_patch} ${_prerelease} "$@"
 
    [ $# -eq 4 ] || exit 1
 
@@ -326,7 +323,7 @@ _semver_caret_op_parsed()
 
    if [ "${minor}" = '*' ]
    then
-      _semver_tilde_op_parsed "$@"
+      semver::qualify::_tilde_op_parsed "$@"
       return $?
    fi
 
@@ -350,8 +347,7 @@ _semver_caret_op_parsed()
       _prerelease="${prerelease}"
    fi
 
-
-   if ! _semver_op_parsed ">=!" "$@"
+   if ! semver::qualify::_op_parsed ">=!" "$@"
    then
       return 1
    fi
@@ -367,23 +363,23 @@ _semver_caret_op_parsed()
             _minor=1
             _patch=0
          else
-            r_semver_increment_numeric "${patch}"
+            semver::parse::r_increment_numeric "${patch}"
             _patch="${RVAL}"
          fi
       else
-         r_semver_increment_numeric "${minor}"
+         semver::parse::r_increment_numeric "${minor}"
          _minor="${RVAL}"
          _patch=0
       fi
    else
-      r_semver_increment_numeric "${major}"
+      semver::parse::r_increment_numeric "${major}"
       _major="${RVAL}"
       _minor=0
       _patch=0
    fi
    _prerelease=
 
-   _semver_op_parsed "<" "$@"
+   semver::qualify::_op_parsed "<" "$@"
    case $?  in
       1) # poisoned is OK here
          return 1
@@ -398,9 +394,9 @@ _semver_caret_op_parsed()
 # a is $1-$4
 # b is in _major - _prerelease
 #
-_semver_op_parsed()
+semver::qualify::_op_parsed()
 {
-   log_entry "_semver_op_parsed" "${_major}" "${_minor}" "${_patch}" "${_prerelease}" "$@"
+   log_entry "semver::qualify::_op_parsed" "${_major}" "${_minor}" "${_patch}" "${_prerelease}" "$@"
 
    local op="$1"; shift
 
@@ -410,16 +406,16 @@ _semver_op_parsed()
 
    case "${op}" in
       '~')
-         _semver_tilde_op_parsed "$@"
+         semver::qualify::_tilde_op_parsed "$@"
          rval=$?
-         log_debug "_semver_op_parsed returns $rval"
+         log_debug "semver::qualify::_op_parsed returns $rval"
          return $rval
       ;;
 
       '^')
-         _semver_caret_op_parsed "$@"
+         semver::qualify::_caret_op_parsed "$@"
          rval=$?
-         log_debug "_semver_op_parsed returns $rval"
+         log_debug "semver::qualify::_op_parsed returns $rval"
          return $rval
       ;;
    esac
@@ -427,7 +423,7 @@ _semver_op_parsed()
    local poisoned
 
    # sadly the order is reversed here, the
-   semver_compare_parsed \
+   semver::parse::compare_parsed \
       "$@" \
       "${_major}" "${_minor}" "${_patch}" "${_prerelease}"
    rval=$?
@@ -436,7 +432,7 @@ _semver_op_parsed()
    then
       [ ${rval} -eq ${semver_same} ]
       rval=$?
-      log_debug "_semver_op_parsed returns $rval"
+      log_debug "semver::qualify::_op_parsed returns $rval"
       return $rval
    fi
 
@@ -466,7 +462,6 @@ _semver_op_parsed()
          fi
       ;;
 
-
       '>=')
          [ $rval -ne ${semver_ascending} ]
          rval=$?
@@ -483,7 +478,7 @@ _semver_op_parsed()
 
          if [ $rval -eq 0 -a ! -z "${4}" ]
          then
-            if ! semver_compare_parsed \
+            if ! semver::parse::compare_parsed \
                "$1" "$2" "$3" ""  \
                "${_major}" "${_minor}" "${_patch}" ""
             then
@@ -508,7 +503,7 @@ _semver_op_parsed()
 
          if [ $rval -eq 0 -a ! -z "${4}" ]
          then
-            if ! semver_compare_parsed \
+            if ! semver::parse::compare_parsed \
                "$1" "$2" "$3" ""  \
                "${_major}" "${_minor}" "${_patch}" ""
             then
@@ -525,7 +520,7 @@ _semver_op_parsed()
 
    [ $rval -eq 2 ] && log_fluff "POISONED"
 
-   log_debug "_semver_op_parsed returns $rval"
+   log_debug "semver::qualify::_op_parsed returns $rval"
    return $rval
 }
 
@@ -553,9 +548,9 @@ _semver_op_parsed()
 #    user/repo See 'GitHub URLs' below
 #    path/path/path See Local Paths below
 #
-_semver_op()
+semver::qualify::_op()
 {
-   log_entry "_semver_op" "$@"
+   log_entry "semver::qualify::_op" "$@"
 
    local op="$1"
    local b="$2"
@@ -571,18 +566,18 @@ _semver_op()
    local _build
    local _prerelease
 
-   if ! semver_parse_lenient "${b}" "${substitute}"
+   if ! semver::qualify::parse_lenient "${b}" "${substitute}"
    then
       exit 1
    fi
 
-   _semver_op_parsed "${op}" "$@"
+   semver::qualify::_op_parsed "${op}" "$@"
 }
 
 
-_semver_qualify_unary()
+semver::qualify::_unary()
 {
-   log_entry "_semver_qualify_unary" "$@"
+   log_entry "semver::qualify::_unary" "$@"
 
    local expr="$1"; shift
 
@@ -590,22 +585,22 @@ _semver_qualify_unary()
 
    case "${expr}" in
       [\<\>]\=*)
-         _semver_op "${expr:0:2}" "${expr#??}" "" "$@"
+         semver::qualify::_op "${expr:0:2}" "${expr#??}" "" "$@"
          rval=$?
       ;;
 
       [\^\~]*)
-         _semver_op "${expr:0:1}" "${expr#?}" "*" "$@"
+         semver::qualify::_op "${expr:0:1}" "${expr#?}" "*" "$@"
          rval=$?
       ;;
 
       [\<\>\=]*)
-         _semver_op "${expr:0:1}" "${expr#?}" "" "$@"
+         semver::qualify::_op "${expr:0:1}" "${expr#?}" "" "$@"
          rval=$?
       ;;
 
       *)
-         _semver_op "=" "${expr}" "*" "$@"
+         semver::qualify::_op "=" "${expr}" "*" "$@"
          rval=$?
       ;;
    esac
@@ -616,15 +611,16 @@ _semver_qualify_unary()
 }
 
 
-r_expr2_increment_partial()
+semver::qualify::r_expr2_increment_partial()
 {
-   r_semver_increment_numeric "${1##*.}"
+   semver::parse::r_increment_numeric "${1##*.}"
    RVAL="${1%.*}.${RVAL}"
 }
 
-_semver_qualify()
+
+semver::qualify::_qualify()
 {
-   log_entry "_semver_qualify" "$@"
+   log_entry "semver::qualify::_qualify" "$@"
 
    local expr="$1"; shift
 
@@ -666,14 +662,14 @@ _semver_qualify()
             ;;
 
             *)
-               r_expr2_increment_partial "${expr2}"
+               semver::qualify::r_expr2_increment_partial "${expr2}"
                expr2="${RVAL}"
                op2="<"
             ;;
          esac
 
-         _semver_op "${op1}" "${expr1}" "*" "$@" &&
-         _semver_op "${op2}" "${expr2}" "*" "$@"
+         semver::qualify::_op "${op1}" "${expr1}" "*" "$@" &&
+         semver::qualify::_op "${op2}" "${expr2}" "*" "$@"
          rval=$?
       ;;
 
@@ -681,8 +677,8 @@ _semver_qualify()
       *\|\|*)
          expr1="${expr%%||}"
          expr2="${expr#*||}"
-         _semver_qualify "${expr1}" "$@" || \
-         _semver_qualify "${expr2}" "$@"
+         semver::qualify::_qualify "${expr1}" "$@" || \
+         semver::qualify::_qualify "${expr2}" "$@"
          rval=$?
       ;;
 
@@ -690,13 +686,13 @@ _semver_qualify()
       *\ *)
          expr1="${expr%%\ *}"
          expr2="${expr#*\ }"
-         _semver_qualify "${expr1}" "$@" && \
-         _semver_qualify "${expr2}" "$@"
+         semver::qualify::_qualify "${expr1}" "$@" && \
+         semver::qualify::_qualify "${expr2}" "$@"
          rval=$?
       ;;
 
       *)
-         _semver_qualify_unary "${expr}" "$@"
+         semver::qualify::_unary "${expr}" "$@"
          rval=$?
       ;;
    esac
@@ -707,9 +703,9 @@ _semver_qualify()
 }
 
 
-r_semver_sanitized_qualifier()
+semver::qualify::sanitized_qualifier()
 {
-   log_entry "r_semver_sanitized_qualifier" "$@"
+   log_entry "semver::qualify::sanitized_qualifier" "$@"
 
    local expr="$1"
 
@@ -755,9 +751,9 @@ r_semver_sanitized_qualifier()
 }
 
 
-semver_qualify()
+semver::qualify::qualify()
 {
-   log_entry "semver_qualify" "$@"
+   log_entry "semver::qualify::qualify" "$@"
 
    local expr="$1"
    local major="$2"
@@ -765,10 +761,10 @@ semver_qualify()
    local patch="$4"
    local prerelease="$5"
 
-   r_semver_sanitized_qualifier "${expr}"
+   semver::qualify::sanitized_qualifier "${expr}"
 
    # change order for convenience
-   _semver_qualify "${RVAL}" "${major}" "${minor}" "${patch}" "${prerelease}"
+   semver::qualify::_qualify "${RVAL}" "${major}" "${minor}" "${patch}" "${prerelease}"
 }
 
 
@@ -779,7 +775,7 @@ semver_single_qualifier=52
 semver_multi_qualifier=53
 
 
-r_semver_qualifier_type_description()
+semver::qualify::r_type_description()
 {
    RVAL="???"
    case "$1" in
@@ -808,9 +804,9 @@ r_semver_qualifier_type_description()
 }
 
 
-_semver_qualifier_unary_type()
+semver::qualify::_unary_type()
 {
-   log_entry "_semver_qualifier_unary_type" "$@"
+   log_entry "semver::qualify::_unary_type" "$@"
 
    local expr="$1"
 
@@ -826,11 +822,11 @@ _semver_qualifier_unary_type()
       ;;
 
       *)
-         if semver_parse "${expr}" "YES"
+         if semver::parse::parse "${expr}" "YES"
          then
             rval=${semver_semver_qualifier}
          else
-            if semver_parse_lenient "${expr}" "" "YES"
+            if semver::qualify::parse_lenient "${expr}" "" "YES"
             then
                rval=${semver_multi_qualifier}
             else
@@ -850,9 +846,9 @@ _semver_qualifier_unary_type()
 #         2 is a single tag qualifier (=1.2.3)
 #         3 is a multiple tag qualifier  (>= 1.2.3)
 #
-_semver_qualifier_type()
+semver::qualify::_type()
 {
-   log_entry "_semver_qualifier_type" "$@"
+   log_entry "semver::qualify::_type" "$@"
 
    local expr="$1"
 
@@ -869,7 +865,7 @@ _semver_qualifier_type()
       ;;
 
       *)
-         _semver_qualifier_unary_type "${expr}"
+         semver::qualify::_unary_type "${expr}"
          rval=$?
       ;;
    esac
@@ -877,9 +873,9 @@ _semver_qualifier_type()
 }
 
 
-semver_qualifier_type_main()
+semver::qualify::qualifier_type_main()
 {
-   log_entry "semver_qualifier_type_main" "$@"
+   log_entry "semver::qualify::qualifier_type_main" "$@"
 
    #
    # handle options
@@ -888,7 +884,7 @@ semver_qualifier_type_main()
    do
       case "$1" in
          -h*|--help|help)
-            semver_qualifier_type_usage
+            semver::qualify::qualifier_type_usage
          ;;
 
          -q|--quiet)
@@ -896,7 +892,7 @@ semver_qualifier_type_main()
          ;;
 
          -*)
-            semver_qualifier_type_usage "Unknown option \"$1\""
+            semver::qualify::qualifier_type_usage "Unknown option \"$1\""
          ;;
 
          *)
@@ -907,16 +903,16 @@ semver_qualifier_type_main()
       shift
    done
 
-   [ $# -ne 1 ] && semver_qualifier_type_usage
+   [ $# -ne 1 ] && semver::qualify::qualifier_type_usage
 
    local qualifier="$1"
 
-   r_semver_sanitized_qualifier "${qualifier}"
+   semver::qualify::sanitized_qualifier "${qualifier}"
    qualifier="${RVAL}"
 
    local rval
 
-   _semver_qualifier_type "${qualifier}"
+   semver::qualify::_type "${qualifier}"
    rval="$?"
 
    if [ "${OPTION_QUIET}" != 'YES' ]
@@ -948,9 +944,9 @@ semver_qualifier_type_main()
 }
 
 
-semver_qualify_main()
+semver::qualify::main()
 {
-   log_entry "semver_qualify_main" "$@"
+   log_entry "semver::qualify::main" "$@"
 
    #
    # handle options
@@ -959,7 +955,7 @@ semver_qualify_main()
    do
       case "$1" in
          -h*|--help|help)
-            semver_qualify_usage
+            semver::qualify::usage
          ;;
 
          -q|--quiet)
@@ -967,7 +963,7 @@ semver_qualify_main()
          ;;
 
          -*)
-            semver_qualify_usage "Unknown option \"$1\""
+            semver::qualify::usage "Unknown option \"$1\""
          ;;
 
          *)
@@ -978,12 +974,12 @@ semver_qualify_main()
       shift
    done
 
-   [ $# -ne 2 ] && semver_qualify_usage
+   [ $# -ne 2 ] && semver::qualify::usage
 
    local qualifier="$1"
    local version="$2"
 
-   r_semver_sanitized_qualifier "${qualifier}"
+   semver::qualify::sanitized_qualifier "${qualifier}"
    qualifier="${RVAL}"
 
    local _line
@@ -993,13 +989,13 @@ semver_qualify_main()
    local _minor
    local _patch
 
-   if ! semver_parse "${version}"
+   if ! semver::parse::parse "${version}"
    then
       return 1
    fi
 
-   if semver_qualify "${qualifier}" \
-                     "${_major}" "${_minor}" "${_patch}" "${_prerelease}"
+   if semver::qualify::qualify "${qualifier}" \
+                               "${_major}" "${_minor}" "${_patch}" "${_prerelease}"
    then
       [ "${OPTION_QUIET}" != 'YES' ] && echo 'YES'
       return 0
@@ -1010,14 +1006,8 @@ semver_qualify_main()
 }
 
 
-if [ "${MULLE_SEMVER_EXTGLOB_MEMO}" -ne 0 ]
-then
-   shell_disable_extglob
-fi
-unset MULLE_SEMVER_EXTGLOB_MEMO
 
-
-semver_qualify_initialize()
+semver::qualify::initialize()
 {
    if [ -z "${MULLE_SEMVER_PARSE_SH}" ]
    then
@@ -1026,5 +1016,5 @@ semver_qualify_initialize()
    fi
 }
 
-semver_qualify_initialize
+semver::qualify::initialize
 
