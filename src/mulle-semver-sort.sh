@@ -77,7 +77,7 @@ semver::sort::_r_qsort_12()
    local lo="$1"
    local hi="$2"
 
-   [ ${lo} -le ${hi} ] || internal_fail "failed assumption ${lo} <= ${hi}"
+   [ ${lo} -le ${hi} ] || _internal_fail "failed assumption ${lo} <= ${hi}"
 
    local n
 
@@ -161,7 +161,7 @@ semver::sort::_r_qsort_partition()
       while :
       do
          i=$((i + 1))
-         _a_line="${_array[${i}]}" || internal_fail "failed"
+         _a_line="${_array[${i}]}" || _internal_fail "failed"
          eval "${_a_line//_/_a_}" # get into _a_major etc.
 
          #set +x
@@ -265,7 +265,7 @@ semver::sort::_r_mergesort_012()
    local array="$1"
    local n="$2"
 
-   [ "${IFS}" = $'\n' ] || internal_fail "IFS not LF"
+   [ "${IFS}" = $'\n' ] || _internal_fail "IFS not LF"
 
    # special cases
    # set -x
@@ -381,8 +381,8 @@ semver::sort::_r_mergesort()
    IFS=$'\n' read -r -d '' -a a_array <<< "${A}"
    IFS=$'\n' read -r -d '' -a b_array <<< "${B}"
 
-   [ ${#b_array[@]} -eq ${l} ] || internal_fail "failed assumption about B (${#b_array[@]} vs ${l})"
-   [ ${#a_array[@]} -eq ${m} ] || internal_fail "failed assumption about A (${#a_array[@]} vs ${m})"
+   [ ${#b_array[@]} -eq ${l} ] || _internal_fail "failed assumption about B (${#b_array[@]} vs ${l})"
+   [ ${#a_array[@]} -eq ${m} ] || _internal_fail "failed assumption about A (${#a_array[@]} vs ${m})"
 
    local i
    local j
@@ -406,7 +406,7 @@ semver::sort::_r_mergesort()
             while [ $j -lt $l ]
             do
                _b_line="${b_array[${j}]}"
-#               [ -z "${_b_line}" ] && internal_fail "failed assumption for j=$j"
+#               [ -z "${_b_line}" ] && _internal_fail "failed assumption for j=$j"
                result[${k}]="${_b_line}"
                k=$((k + 1))
                j=$((j + 1))
@@ -415,7 +415,7 @@ semver::sort::_r_mergesort()
          fi
 
          _a_line="${a_array[${i}]}"
-         #[ -z "${_a_line}" ] && internal_fail "failed assumption for i=$i"
+         #[ -z "${_a_line}" ] && _internal_fail "failed assumption for i=$i"
 
          eval "${_a_line//_/_a_}" # get into a_major etc.
       fi
@@ -427,7 +427,7 @@ semver::sort::_r_mergesort()
             while [ $i -lt $m ]
             do
                _a_line="${a_array[${i}]}"
-#               [ -z "${_a_line}" ] && internal_fail "failed assumption for i=$i"
+#               [ -z "${_a_line}" ] && _internal_fail "failed assumption for i=$i"
                result[${k}]="${_a_line}"
                k=$((k + 1))
                i=$((i + 1))
@@ -436,7 +436,7 @@ semver::sort::_r_mergesort()
          fi
 
          _b_line="${b_array[${j}]}"
-         #[ -z "${_b_line}" ] && internal_fail "failed assumption for j=$j"
+         #[ -z "${_b_line}" ] && _internal_fail "failed assumption for j=$j"
          eval "${_b_line//_/_b_}" # get into a_major etc.
       fi
 
@@ -449,13 +449,13 @@ semver::sort::_r_mergesort()
 
       if [ $rval -ne ${_semver_sort_descending} ]
       then
-#         [ -z "${_a_line}" ] && internal_fail "failed assumption for _a_line"
+#         [ -z "${_a_line}" ] && _internal_fail "failed assumption for _a_line"
          result[${k}]="${_a_line}"
          k=$((k + 1))
          i=$((i + 1))
          _a_major=""
       else
-#         [ -z "${_b_line}" ] && internal_fail "failed assumption for _b_line"
+#         [ -z "${_b_line}" ] && _internal_fail "failed assumption for _b_line"
          result[${k}]="${_b_line}"
          k=$((k + 1))
          j=$((j + 1))
@@ -484,8 +484,8 @@ semver::sort::r_sort_parsed_versions()
       return
    fi
 
-   [ -z "${semver_descending}" ] && internal_fail "semver_descending not set"
-   [ -z "${semver_ascending}" ] && internal_fail "semver_ascending not set"
+   [ -z "${semver_descending}" ] && _internal_fail "semver_descending not set"
+   [ -z "${semver_ascending}" ] && _internal_fail "semver_ascending not set"
 
    local _semver_sort_ascending=${semver_ascending}
    local _semver_sort_descending=${semver_descending}

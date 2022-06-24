@@ -78,7 +78,7 @@ semver::search::_r_search_sorted_parsed_versions()
 {
    local qualifier="$1"
 
-#   [ -z "${qualifier}" ] && internal_fail "qualifier is empty"
+#   [ -z "${qualifier}" ] && _internal_fail "qualifier is empty"
 
    local mid
    local i

@@ -425,8 +425,8 @@ semver::parse::numeric_compare()
    local a="$1"
    local b="$2"
 #
-#   [ -z "${a}" ] && internal_fail "a is empty"
-#   [ -z "${b}" ] && internal_fail "b is empty"
+#   [ -z "${a}" ] && _internal_fail "a is empty"
+#   [ -z "${b}" ] && _internal_fail "b is empty"
 
    if [ "${a}" = "${b}" -o "${a}" = '*' -o "${b}" = '*' ]
    then
@@ -634,7 +634,7 @@ semver::parse::compare_parsed()
 #
 #   [ $# -ne 8 ] && echo "need 8 parameters">&2 && exit 1
 #
-#   shell_is_extglob_enabled || internal_fail "extglob must have been set"
+#   shell_is_extglob_enabled || _internal_fail "extglob must have been set"
 #
    local rval
 
@@ -685,7 +685,7 @@ semver::parse::compare_parsed()
       fi
    fi
 
-#   log_fluff "<${a_major}.${a_minor}.${a_patch}-${a_prerelease}> ~ \
+#   _log_fluff "<${a_major}.${a_minor}.${a_patch}-${a_prerelease}> ~ \
 #<${b_major}.${b_minor}.${b_patch}-${b_prerelease}> : ${rval}"
 #   log_debug "semver::parse::compare_parsed returns `semver::parse::output_comparison_result $rval`"
    return $rval
@@ -696,7 +696,7 @@ semver::parse::validate_number()
 {
    log_entry "semver::parse::validate_number" "$@"
 
-   shell_is_extglob_enabled || internal_fail "extglob must have been set `shopt extglob`"
+   shell_is_extglob_enabled || _internal_fail "extglob must have been set `shopt extglob`"
 
    case "$1" in
       0|[1-9]*([0-9]))
@@ -713,7 +713,7 @@ semver::parse::validate_alphanumeric()
 {
    log_entry "semver::parse::validate_alphanumeric" "$@"
 
-   shell_is_extglob_enabled || internal_fail "extglob must have been set"
+   shell_is_extglob_enabled || _internal_fail "extglob must have been set"
 
    case "$1" in
       +([0-9a-zA-Z-]))

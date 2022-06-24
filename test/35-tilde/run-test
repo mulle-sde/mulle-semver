@@ -17,7 +17,7 @@ expect()
 
    if [ "${result}" != "${expect}" ]
    then
-      internal_fail "Expected \"${expect}\" but got \"${result}\""
+      _internal_fail "Expected \"${expect}\" but got \"${result}\""
    fi
 }
 

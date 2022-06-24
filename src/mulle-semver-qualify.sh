@@ -122,7 +122,7 @@ semver::qualify::r_version_triple_parse_lenient()
 
    if ! shell_is_extglob_enabled
    then
-      internal_fail "extglob must have been set"
+      _internal_fail "extglob must have been set"
    fi
 
    local r
@@ -400,7 +400,7 @@ semver::qualify::_op_parsed()
 
    local op="$1"; shift
 
-   [ $# -eq 4 ] || internal_fail "API mismatch"
+   [ $# -eq 4 ] || _internal_fail "API mismatch"
 
    local rval
 
