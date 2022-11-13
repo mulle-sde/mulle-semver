@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+# shellcheck shell=bash
 #
 #   Copyright (c) 2021 Nat! - Mulle kybernetiK
 #   All rights reserved.
@@ -1127,6 +1127,10 @@ semver::parse::compare_main()
 }
 
 
+semver::parse::parse_main()
+{
+   semver::parse::main "$@"
+}
 
 
 if [ "${MULLE_SEMVER_EXTGLOB_MEMO}" -ne 0 ]
