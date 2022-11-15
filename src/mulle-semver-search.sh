@@ -85,7 +85,6 @@ semver::search::_r_search_sorted_parsed_versions()
    local n
    local line
    local found
-   local found
 
    local _line
    local _major
@@ -94,6 +93,10 @@ semver::search::_r_search_sorted_parsed_versions()
    local _prerelease
    local _build
 
+   if [ ${ZSH_VERSION+x} ]
+   then
+      setopt local_options KSH_ARRAYS
+   fi
    #
    # can't use binary search here, because qualifier can't say  if
    # descending or ascending (e.g. =0.0.0||=9.9.9)
@@ -141,8 +144,21 @@ semver::search::r_search_parsed_versions()
    qualifier="${RVAL}"
 
    declare -a _array
-
-   IFS=$'\n' read -r -d '' -a _array <<< "${sorted}"
+   local i
+   local line 
+   
+   if [ ${ZSH_VERSION+x} ]
+   then
+      setopt local_options KSH_ARRAYS
+      i=0
+      .foreachline line in ${sorted}
+      .do 
+         _array[${i}]="${line}"
+         i=$((i + 1))
+      .done
+   else
+      IFS=$'\n' read -r -d '' -a _array <<< "${sorted}"
+   fi
 
    semver::search::_r_search_sorted_parsed_versions "${qualifier}"
 }

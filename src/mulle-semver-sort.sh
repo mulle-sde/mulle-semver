@@ -81,6 +81,11 @@ semver::sort::_r_qsort_12()
 
    local n
 
+   if [ ${ZSH_VERSION+x} ]
+   then
+      setopt local_options KSH_ARRAYS
+   fi
+
    # set -x
    n=$((hi - lo + 1))
 
@@ -131,6 +136,11 @@ semver::sort::_r_qsort_partition()
 
    local lo="$1"
    local hi="$2"
+
+   if [ ${ZSH_VERSION+x} ]
+   then
+      setopt local_options KSH_ARRAYS
+   fi
 
    #set -x
    #
@@ -360,9 +370,7 @@ semver::sort::_r_mergesort()
    semver::sort::_r_mergesort "${array}" ${m}
    A="${RVAL}"
 
-   # this will reset the IFS
    r_lines_in_range "${array}" ${m} ${l}
-   IFS=$'\n'
 
    semver::sort::_r_mergesort "${RVAL}" ${l}
    B="${RVAL}"
@@ -377,15 +385,33 @@ semver::sort::_r_mergesort()
    declare -a a_array
    declare -a b_array
 
-   # this works on old macOS bash, is it much slower ?
-   IFS=$'\n' read -r -d '' -a a_array <<< "${A}"
-   IFS=$'\n' read -r -d '' -a b_array <<< "${B}"
+   local i
+   local j
+   local line 
+
+   if [ ${ZSH_VERSION+x} ]
+   then
+      setopt local_options KSH_ARRAYS
+      i=0
+      .foreachline line in ${A}
+      .do 
+         a_array[${i}]="${line}"
+         i=$((i + 1))
+      .done
+      i=0
+      .foreachline line in ${B}
+      .do 
+         b_array[${i}]="${line}"
+         i=$((i + 1))
+      .done
+   else
+      IFS=$'\n' read -r -d '' -a a_array <<< "${A}"
+      IFS=$'\n' read -r -d '' -a b_array <<< "${B}"
+   fi
 
    [ ${#b_array[@]} -eq ${l} ] || _internal_fail "failed assumption about B (${#b_array[@]} vs ${l})"
    [ ${#a_array[@]} -eq ${m} ] || _internal_fail "failed assumption about A (${#a_array[@]} vs ${m})"
 
-   local i
-   local j
    local k
    local rval
    declare -a result
@@ -496,48 +522,58 @@ semver::sort::r_sort_parsed_versions()
       _semver_sort_descending=${semver_ascending}
    fi
 
-   shell_disable_glob
-   {
-      declare -a _array
-      local n
+   declare -a _array
 
+   local i
+   local n
+   local line 
+
+   if [ ${ZSH_VERSION+x} ]
+   then
+      setopt local_options KSH_ARRAYS
+
+      i=0
+      .foreachline line in ${array}
+      .do 
+         _array[${i}]="${line}"
+         i=$((i + 1))
+      .done
+   else
       IFS=$'\n' read -r -d '' -a _array <<< "${array}"
-      n=${#_array[@]}
+   fi
 
-      # define a few local variables for later benefit
-      local _comparisons
-      local _a_line
-      local _a_major
-      local _a_minor
-      local _a_patch
-      local _a_prerelease
-      local _a_build
+   n=${#_array[@]}
 
-      local _b_line
-      local _b_major
-      local _b_minor
-      local _b_patch
-      local _b_prerelease
-      local _b_build
+   # define a few local variables for later benefit
+   local _comparisons
+   local _a_line
+   local _a_major
+   local _a_minor
+   local _a_patch
+   local _a_prerelease
+   local _a_build
 
-      _comparisons=0
-      if [ "${algorithm}" = 'mergesort' ]
+   local _b_line
+   local _b_major
+   local _b_minor
+   local _b_patch
+   local _b_prerelease
+   local _b_build
+
+   _comparisons=0
+   if [ "${algorithm}" = 'mergesort' ]
+   then
+      semver::sort::_r_mergesort "${array}" ${n}
+   else
+      # When used in a function, declare makes each name local
+      if [ ${n} -ne 0 ]
       then
-         semver::sort::_r_mergesort "${array}" ${n}
-      else
-         # When used in a function, declare makes each name local
-         if [ ${n} -ne 0 ]
-         then
-            semver::sort::_qsort 0 $(( ${n} - 1 ))
-         fi
-         RVAL="${_array[*]}"
+         semver::sort::_qsort 0 $(( ${n} - 1 ))
       fi
-      log_debug   "SORTED: ${RVAL}"
-      log_verbose "COMPARISONS=${_comparisons}"
-   }
-   shell_enable_glob
-
-   IFS="${DEFAULT_IFS}"
+      RVAL="${_array[*]}"
+   fi
+   log_debug   "SORTED: ${RVAL}"
+   log_verbose "COMPARISONS=${_comparisons}"
 }
 
 

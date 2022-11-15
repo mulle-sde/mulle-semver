@@ -804,9 +804,9 @@ semver::qualify::r_type_description()
 }
 
 
-semver::qualify::_unary_type()
+semver::qualify::which_unary_type()
 {
-   log_entry "semver::qualify::_unary_type" "$@"
+   log_entry "semver::qualify::which_unary_type" "$@"
 
    local expr="$1"
 
@@ -846,9 +846,9 @@ semver::qualify::_unary_type()
 #         2 is a single tag qualifier (=1.2.3)
 #         3 is a multiple tag qualifier  (>= 1.2.3)
 #
-semver::qualify::_type()
+semver::qualify::which_type()
 {
-   log_entry "semver::qualify::_type" "$@"
+   log_entry "semver::qualify::which_type" "$@"
 
    local expr="$1"
 
@@ -865,7 +865,7 @@ semver::qualify::_type()
       ;;
 
       *)
-         semver::qualify::_unary_type "${expr}"
+         semver::qualify::which_unary_type "${expr}"
          rval=$?
       ;;
    esac
@@ -912,7 +912,7 @@ semver::qualify::qualifier_type_main()
 
    local rval
 
-   semver::qualify::_type "${qualifier}"
+   semver::qualify::which_type "${qualifier}"
    rval="$?"
 
    if [ "${OPTION_QUIET}" != 'YES' ]
