@@ -25,24 +25,6 @@ export PROJECT_NAME="mulle-semver"
 #
 #
 #
-export PROJECT_IDENTIFIER="mulle_semver"
-
-
-#
-#
-#
-export PROJECT_DOWNCASE_IDENTIFIER="mulle_semver"
-
-
-#
-#
-#
-export PROJECT_UPCASE_IDENTIFIER="MULLE_SEMVER"
-
-
-#
-#
-#
 export PROJECT_LANGUAGE="bash"
 
 
