@@ -845,7 +845,7 @@ semver::parse::r_grab_versions()
       [ $# -ne 0 ] && $usage "Superflous arguments \"$*\""
 
       # remove comments gratuitously
-      versions="`egrep -v '^#' `"
+      versions="`grep -E -v '^#' `"
    else
       while [ $# -ne 0 ]
       do

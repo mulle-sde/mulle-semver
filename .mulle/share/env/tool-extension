@@ -6,7 +6,6 @@ id;optional
 inotifywait;optional
 ssh;optional
 tar;optional
-tty;optional
 zip;optional
 xz;optional
 bzip2;optional

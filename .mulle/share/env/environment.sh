@@ -7,31 +7,18 @@
 # If mulle-env is broken, sometimes its nice just to source this file.
 # If you're sourcing this manually on a regular basis, you're doing it wrong.
 #
-# We need some minimal stuff to get things going though:
-#     sed, cut, tr, hostname, pwd, uname
-#
-if [ -z "${MULLE_UNAME}" ]
-then
-   MULLE_UNAME="`PATH=/bin:/usr/bin uname | \
-                  PATH=/bin:/usr/bin cut -d_ -f1 | \
-                  PATH=/bin:/usr/bin sed 's/64$//' | \
-                  PATH=/bin:/usr/bin tr 'A-Z' 'a-z'`"
-   export MULLE_UNAME
-fi
-if [ -z "${MULLE_HOSTNAME}" ]
-then
-   MULLE_HOSTNAME="`PATH=/bin:/usr/bin:/sbin:/usr/sbin hostname -s`"
-   if [ "${MULLE_HOSTNAME:0:1}" = '.' ]
-   then
-      MULLE_HOSTNAME="_${MULLE_HOSTNAME}"
-   fi
-   export MULLE_HOSTNAME
-fi
 if [ -z "${MULLE_VIRTUAL_ROOT}" ]
 then
    MULLE_VIRTUAL_ROOT="`PATH=/bin:/usr/bin pwd -P`"
    echo "Using ${MULLE_VIRTUAL_ROOT} as MULLE_VIRTUAL_ROOT for \
 your convenience" >&2
+fi
+
+if [ -z "${MULLE_UNAME}" ]
+then
+   MULLE_UNAME="`PATH=/bin:/usr/bin uname -s 2> /dev/null | tr '[:upper:]' '[:lower:]'`"
+   MULLE_UNAME="${MULLE_UNAME:-unknown}"
+   echo "Using ${MULLE_UNAME} as MULLE_UNAME for your convenience" >&2
 fi
 
 #
@@ -54,7 +41,7 @@ case "${MULLE_SHELL_MODE}" in
          ;;
 
          *\\h*)
-            PS1="$(sed 's/\\h/\\h\['${envname}'\]/' <<< '${PS1}' )"
+            PS1="$(sed 's/\\h/\\h\['${envname}'\]/' <<< "${PS1}" )"
          ;;
 
          *)
@@ -66,29 +53,35 @@ case "${MULLE_SHELL_MODE}" in
       unset envname
 
       # install cd catcher
-      . "${MULLE_ENV_LIBEXEC_DIR}/mulle-env-cd.sh"
-      unset MULLE_ENV_LIBEXEC_DIR
+      if [ ! -z "${MULLE_ENV_LIBEXEC_DIR}" ]
+      then
+         . "${MULLE_ENV_LIBEXEC_DIR}/mulle-env-cd.sh"
+         unset MULLE_ENV_LIBEXEC_DIR
+      fi
 
       # install mulle-env-reload
 
       alias mulle-env-reload='. "${MULLE_VIRTUAL_ROOT}/.mulle/share/env/include-environment.sh"'
 
-
       #
       # source in any bash completion files
       #
       DEFAULT_IFS="${IFS}"
-      shopt -s nullglob; IFS=$'\n'
+      IFS=$'\n'
+      # memo: nullglob not easily done on both bash and zsh
       for FILENAME in "${MULLE_VIRTUAL_ROOT}/.mulle/share/env/libexec"/*-bash-completion.sh
       do
-         . "${FILENAME}"
+         if [ -f "${FILENAME}" ]
+         then
+            . "${FILENAME}"
+         fi
       done
-      shopt -u nullglob; IFS="${DEFAULT_IFS}"
+      IFS="${DEFAULT_IFS}"
 
       unset DEFAULT_IFS
       unset FILENAME
 
-      vardir="${MULLE_VIRTUAL_ROOT}/.mulle/var/${MULLE_HOSTNAME}"
+      vardir="${MULLE_VIRTUAL_ROOT}/.mulle/var/${MULLE_HOSTNAME:-unknown-host}"
       [ -d "${vardir}" ] || mkdir -p "${vardir}"
 
       HISTFILE="${vardir}/bash_history"
