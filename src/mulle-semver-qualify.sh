@@ -29,7 +29,7 @@
 #   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #   POSSIBILITY OF SUCH DAMAGE.
 #
-MULLE_SEMVER_QUALIFY_SH="included"
+MULLE_SEMVER_QUALIFY_SH='included'
 
 #
 # to be able to parse the following functions, we have to turn extglob on here
@@ -785,7 +785,7 @@ semver::qualify::r_type_description()
 
       ${semver_no_qualifier})
          # could be a tag, but definitely not a semver qualifier
-         RVAL="NO"
+         RVAL='NO'
       ;;
 
       ${semver_single_qualifier})
@@ -822,11 +822,11 @@ semver::qualify::which_unary_type()
       ;;
 
       *)
-         if semver::parse::parse "${expr}" "YES"
+         if semver::parse::parse "${expr}" 'YES'
          then
             rval=${semver_semver_qualifier}
          else
-            if semver::qualify::parse_lenient "${expr}" "" "YES"
+            if semver::qualify::parse_lenient "${expr}" "" 'YES'
             then
                rval=${semver_multi_qualifier}
             else
@@ -923,7 +923,7 @@ semver::qualify::qualifier_type_main()
          ;;
 
          ${semver_no_qualifier})
-            echo "NO"
+            echo 'NO'
          ;;
 
          ${semver_semver_qualifier})

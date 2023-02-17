@@ -1,0 +1,12 @@
+{
+   project =
+   {
+      description="📍 semantic versioning tool";
+      domain="github";
+      name="mulle-semver";
+      username="srcS";
+      reponame="mulle-semver";
+      homepage="https://github.com/mulle-sde/mulle-semver";
+      license="BSD-3-Clause"
+   };
+}

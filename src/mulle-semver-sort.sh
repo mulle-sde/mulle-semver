@@ -29,7 +29,7 @@
 #   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #   POSSIBILITY OF SUCH DAMAGE.
 #
-MULLE_SEMVER_SORT_SH="included"
+MULLE_SEMVER_SORT_SH='included'
 
 #
 # to be able to parse the following functions, we have to turn extglob on here
@@ -597,19 +597,19 @@ semver::sort::main()
          ;;
 
          -q|--quiet)
-            OPTION_QUIET="YES"
+            OPTION_QUIET='YES'
          ;;
 
          -l|--lenient)
-            OPTION_LENIENT="YES"
+            OPTION_LENIENT='YES'
          ;;
 
          --pretty)
-            OPTION_PRETTY="YES"
+            OPTION_PRETTY='YES'
          ;;
 
          -r|--reverse)
-            OPTION_REVERSE="YES"
+            OPTION_REVERSE='YES'
          ;;
 
          --unixsort)

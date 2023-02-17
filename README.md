@@ -1,6 +1,6 @@
-# mulle-semver
+# 📍 semantic versioning tool
 
-#### 📍 semantic version qualification
+... for Android, BSDs, Linux, macOS, SunOS, Windows (MinGW, WSL)
 
 This is most of npm's [semver](//docs.npmjs.com/cli/v6/using-npm/semver/)
 functionality reimplemented in bash (up to but not including "Functions").
@@ -8,17 +8,15 @@ Besides it being written in bash, there are no advantages of mulle-semver over
 npm semver.
 
 The commandline interface is also different. It's primary use is not
-as a standalone tool, but as a library for [mulle-fetch](//github.com/mulle-sde/mulle-fetch).
+as a standalone tool, but as a library for
+[mulle-fetch](//github.com/mulle-sde/mulle-fetch).
+
+| Release Version                                       | Release Notes
+|-------------------------------------------------------|--------------
+| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/srcS/mulle-semver.svg?branch=release) | [RELEASENOTES](RELEASENOTES.md) |
 
 
 
-> #### Example
->
-> Figure out best (highest) matching version:
->
-> ```
-> mulle-semver search '>=1.2.0' 1.1.0 1.2.0 1.3.0
-> ```
 
 
 ## Commands
@@ -81,13 +79,29 @@ Searches through a list of versions for the best matching value, which is the
 highest version that fits the qualifier.
 
 
-## Build
 
-This is a [mulle-sde](https://mulle-sde.github.io/) project.
 
-It comes with its own virtual environment and list of dependencies.
-To fetch and build everything say:
 
+
+
+## Install
+
+See [mulle-sde-developer](//github.com/mulle-sde/mulle-sde-developer) how to
+install mulle-sde, which will also install mulle-semver with required
+dependencies.
+
+The command to install only the latest mulle-semver into
+`/usr/local` (with **sudo**) is:
+
+``` bash
+curl -L 'https://github.com/srcS/mulle-semver/archive/latest.tar.gz' \
+ | tar xfz - && cd 'mulle-semver-latest' && sudo ./bin/installer /usr/local
 ```
-mulle-sde craft
-```
+
+
+
+## Author
+
+[Nat!](https://mulle-kybernetik.com/weblog) for Mulle kybernetiK
+
+
