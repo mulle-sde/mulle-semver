@@ -56,7 +56,7 @@ main()
    ${MULLE_SEMVER} numeric-compare -q 999999999999999 999999999999998
    expect ${DESCENDING} $?
 
-   ${MULLE_SEMVER} numeric-compare 00 0
+   ${MULLE_SEMVER} -s --no-errors  numeric-compare 00 0
    expect 1 $?
 
    log_info "----- ALL PASSED -----"

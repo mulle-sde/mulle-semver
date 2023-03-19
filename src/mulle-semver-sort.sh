@@ -106,7 +106,7 @@ semver::sort::_r_qsort_12()
          _comparisons=$((_comparisons + 1))
          #set +x
          semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
-                               "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
+                                       "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
          rval="$?"
          #set -x
 
@@ -178,7 +178,7 @@ semver::sort::_r_qsort_partition()
          # a is array[i], b is array[ pivot]
          _comparisons=$((_comparisons + 1))
          semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
-                               "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
+                                       "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
          rval=$?
          #set -x
 
@@ -200,7 +200,7 @@ semver::sort::_r_qsort_partition()
          #set +x
          _comparisons=$((_comparisons + 1))
          semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
-                               "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
+                                       "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
          rval=$?
          #set -x
 
@@ -322,7 +322,7 @@ semver::sort::_r_mergesort_012()
          _comparisons=$((_comparisons + 1))
          # set +x
          semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
-                               "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
+                                       "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
          rval="$?"
          # set -x
 
@@ -573,7 +573,7 @@ semver::sort::r_sort_parsed_versions()
       RVAL="${_array[*]}"
    fi
    log_debug   "SORTED: ${RVAL}"
-   log_verbose "COMPARISONS=${_comparisons}"
+   log_verbose "COMPARISONS: ${_comparisons}"
 }
 
 
@@ -669,8 +669,8 @@ semver::sort::main()
       # now that we have all versions in parsed format, we need to sort
       # them
       semver::sort::r_sort_parsed_versions "${parsed_versions}" \
-                                          "${OPTION_REVERSE}" \
-                                          "${OPTION_ALGORITHM}"
+                                           "${OPTION_REVERSE}" \
+                                           "${OPTION_ALGORITHM}"
    fi
 
    semver::parse::parsed_versions_decriptions "${RVAL}" "${OPTION_PRETTY}"
@@ -681,21 +681,9 @@ semver::sort::main()
 
 semver::sort::initialize()
 {
-   if [ -z "${MULLE_SEMVER_PARSE_SH}" ]
-   then
-      # shellcheck source=mulle-semver-parse.sh
-      . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-parse.sh" || exit 1
-   fi
-   if [ -z "${MULLE_SEMVER_QUALIFY_SH}" ]
-   then
-      # shellcheck source=mulle-semver-qualify.sh
-      . "${MULLE_SEMVER_LIBEXEC_DIR}/mulle-semver-qualify.sh" || exit 1
-   fi
-
-   if [ -z "${MULLE_ARRAY_SH}" ]
-   then
-      . "${MULLE_BASHFUNCTIONS_LIBEXEC_DIR}/mulle-array.sh" || exit 1
-   fi
+   include "semver::parse"
+   include "semver::qualify"
+   include "array"
 }
 
 semver::sort::initialize

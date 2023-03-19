@@ -54,7 +54,7 @@ main()
    ${MULLE_SEMVER} alphanumeric-compare -q cba c
    expect ${DESCENDING} $?
 
-   ${MULLE_SEMVER} alphanumeric-compare -q "" ""
+   ${MULLE_SEMVER} --no-errors -s alphanumeric-compare -q "" ""
    expect 1 $?
 
    log_info "----- ALL PASSED -----"
