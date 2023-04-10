@@ -85,7 +85,6 @@ main()
       shift
    done
 
-   local i
 
    log_verbose "mulle-semver: `mulle-semver version` (`mulle-semver libexec-dir`)"
 

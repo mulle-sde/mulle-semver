@@ -733,7 +733,7 @@ semver::qualify::sanitized_qualifier()
    #
    while [ "${s}" != "${expr}" ]
    do
-      s=${expr}
+      s="${expr}"
       expr="${expr//  / }"
    done
 
@@ -746,8 +746,7 @@ semver::qualify::sanitized_qualifier()
    expr="${expr// ||/||}"
    expr="${expr//|| /||}"
 
-   expr="${expr#vV}"
-   RVAL=${expr}
+   RVAL="${expr#vV}"
 }
 
 
