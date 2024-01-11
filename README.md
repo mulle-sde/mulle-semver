@@ -13,7 +13,7 @@ as a standalone tool, but as a library for
 
 | Release Version                                       | Release Notes
 |-------------------------------------------------------|--------------
-| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/srcS/mulle-semver.svg?branch=release) | [RELEASENOTES](RELEASENOTES.md) |
+| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/srcS/mulle-semver.svg?branch=release)  | [RELEASENOTES](RELEASENOTES.md) |
 
 
 
@@ -77,6 +77,7 @@ mulle-semver search '>=1.2.0' 1.1.0 1.2.0 1.3.0
 
 Searches through a list of versions for the best matching value, which is the
 highest version that fits the qualifier.
+
 
 
 
