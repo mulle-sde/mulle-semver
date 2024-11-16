@@ -16,3 +16,4 @@ cola/wilted/
 mulle-markdown-preview-*.html
 build-*/
 version.old
+.mulle/etc/project/publisher-info.sh

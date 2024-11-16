@@ -1,3 +1,7 @@
+### 1.0.5
+
+Various small improvements
+
 ### 1.0.4
 
 * Various small improvements

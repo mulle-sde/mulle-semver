@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 
-project( mulle-semver NONE)
+project( mulle-semver VERSION 1.0.5 LANGUAGES NONE)
 
 #
 # Primarily used for packaging on Linux
@@ -16,7 +16,7 @@ project( mulle-semver NONE)
 #
 
 execute_process( COMMAND ./mulle-semver version
-                 WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                  OUTPUT_VARIABLE MULLE_SEMVER_VERSION
                  OUTPUT_STRIP_TRAILING_WHITESPACE)
 message( STATUS "MULLE_SEMVER_VERSION is ${MULLE_DISPENSE_VERSION} according to mulle-semver")
@@ -59,4 +59,3 @@ DESTINATION "libexec/mulle-semver")
 # must be after CPACK_PACKAGE_VERSION
 include( CMakePackage.cmake)
 include( CPack)
-
