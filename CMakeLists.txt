@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 
-project( mulle-semver VERSION 1.0.5 LANGUAGES NONE)
+project( mulle-semver VERSION 1.0.6 LANGUAGES NONE)
 
 #
 # Primarily used for packaging on Linux

@@ -879,7 +879,7 @@ semver::qualify::qualifier_type_main()
    #
    # handle options
    #
-   while :
+   while [ $# -ne 0 ]
    do
       case "$1" in
          -h*|--help|help)
@@ -950,7 +950,7 @@ semver::qualify::main()
    #
    # handle options
    #
-   while :
+   while [ $# -ne 0 ]
    do
       case "$1" in
          -h*|--help|help)

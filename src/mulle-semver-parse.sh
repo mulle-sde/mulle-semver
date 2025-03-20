@@ -758,7 +758,7 @@ semver::parse::alphanumeric_compare_main()
    #
    # handle options
    #
-   while :
+   while [ $# -ne 0 ]
    do
       case "$1" in
          -h*|--help|help)
@@ -798,7 +798,7 @@ semver::parse::numeric_compare_main()
    #
    # handle options
    #
-   while :
+   while [ $# -ne 0 ]
    do
       case "$1" in
          -h*|--help|help)
@@ -979,7 +979,7 @@ semver::parse::main()
    #
    # handle options
    #
-   while :
+   while [ $# -ne 0 ]
    do
       case "$1" in
          -h*|--help|help)
@@ -1071,7 +1071,7 @@ semver::parse::compare_main()
    #
    # handle options
    #
-   while :
+   while [ $# -ne 0 ]
    do
       case "$1" in
          -h*|--help|help)
