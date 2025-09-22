@@ -842,7 +842,7 @@ semver::parse::r_grab_versions()
    if [ "$1" = "-" ]
    then
       shift
-      [ $# -ne 0 ] && $usage "Superflous arguments \"$*\""
+      [ $# -ne 0 ] && $usage "Superfluous arguments \"$*\""
 
       # remove comments gratuitously
       versions="`grep -E -v '^#' `"
