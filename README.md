@@ -13,7 +13,7 @@ as a standalone tool, but as a library for
 
 | Release Version                                       | Release Notes
 |-------------------------------------------------------|--------------
-| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/srcS/mulle-semver.svg?branch=release)  | [RELEASENOTES](RELEASENOTES.md) |
+| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/srcS/mulle-semver.svg)  | [RELEASENOTES](RELEASENOTES.md) |
 
 
 
