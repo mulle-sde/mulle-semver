@@ -505,20 +505,20 @@ semver::parse::alphanumeric_compare()
    fi
 
    local old
-   local rval
+   local rc
 
    # clumsy but necessary
    old="${LC_ALL}"
    LC_ALL='C'
 
-   rval=${semver_descending}
+   rc=${semver_descending}
    if [[ "${a}" < "${b}" ]]
    then
-      rval=${semver_ascending}
+      rc=${semver_ascending}
    fi
 
    LC_ALL="${old}"
-   return ${rval}
+   return ${rc}
 }
 
 
@@ -587,7 +587,7 @@ semver::parse::prerelease_compare()
    local b_part
    local a_remainder
    local b_remainder
-   local rval
+   local rc
 
    a_remainder="${a_prerelease}"
    b_remainder="${b_prerelease}"
@@ -602,11 +602,11 @@ semver::parse::prerelease_compare()
       b_remainder="${b_remainder#.}"
 
       semver::parse::prerelease_part_compare "${a_part}" "${b_part}"
-      rval=$?
+      rc=$?
 
-      if [ "${rval}" != ${semver_same} ]
+      if [ "${rc}" != ${semver_same} ]
       then
-         return ${rval}
+         return ${rc}
       fi
 
       if [ -z "${a_remainder}" ]
@@ -636,23 +636,23 @@ semver::parse::compare_parsed()
 #
 #   shell_is_extglob_enabled || _internal_fail "extglob must have been set"
 #
-   local rval
+   local rc
 
-   rval=${semver_same}
+   rc=${semver_same}
    if [ "${1}" != "${5}" ]
    then
       semver::parse::numeric_compare "${1}" "${5}"
-      rval=$?
+      rc=$?
    else
       if [ "${2}" != "${6}" ]
       then
          semver::parse::numeric_compare "${2}" "${6}"
-         rval=$?
+         rc=$?
       else
          if [ "${3}" != "${7}" ]
          then
             semver::parse::numeric_compare "${3}" "${7}"
-            rval=$?
+            rc=$?
          fi
       fi
    fi
@@ -668,27 +668,27 @@ semver::parse::compare_parsed()
 
    if [ "${4}" != "${8}" ]
    then
-      if [ $rval -eq ${semver_same} ]
+      if [ $rc -eq ${semver_same} ]
       then
          if [ -z "${8}" ]
          then
-            rval=${semver_ascending}
+            rc=${semver_ascending}
          else
             if [ -z "${4}" ]
             then
-               rval=${semver_descending}
+               rc=${semver_descending}
             else
                semver::parse::prerelease_compare "${4}" "${8}"
-               rval=$?
+               rc=$?
             fi
          fi
       fi
    fi
 
 #   _log_fluff "<${a_major}.${a_minor}.${a_patch}-${a_prerelease}> ~ \
-#<${b_major}.${b_minor}.${b_patch}-${b_prerelease}> : ${rval}"
-#   log_debug "semver::parse::compare_parsed returns `semver::parse::output_comparison_result $rval`"
-   return $rval
+#<${b_major}.${b_minor}.${b_patch}-${b_prerelease}> : ${rc}"
+#   log_debug "semver::parse::compare_parsed returns `semver::parse::output_comparison_result $rc`"
+   return $rc
 }
 
 
@@ -728,12 +728,12 @@ semver::parse::validate_alphanumeric()
 
 semver::parse::output_comparison_result()
 {
-   local rval="$1"
+   local code="$1"
    local quiet="$2"
 
    if [ "${quiet}" != 'YES' ]
    then
-      case $rval in
+      case $code in
          ${semver_ascending})
             echo "ASCENDING"
          ;;
@@ -747,7 +747,7 @@ semver::parse::output_comparison_result()
          ;;
       esac
    fi
-   return $rval
+   return $code
 }
 
 
@@ -891,25 +891,25 @@ semver::parse::parse_versions()
    local _major
    local _minor
    local _patch
-   local rval
+   local rc
 
-   rval=0
+   rc=0
 
    # now parse all versions
    .foreachline version in ${versions}
    .do
       if ! semver::parse::parse "${version}" "${quiet}" "${lenient}"
       then
-         if [ $rval -eq 0 ]
+         if [ $rc -eq 0 ]
          then
-            rval=1
+            rc=1
          fi
          .continue
       fi
 
-      if [ $rval -eq 1 ]
+      if [ $rc -eq 1 ]
       then
-         rval=2
+         rc=2
       fi
 
       line="_line=${version};_major=${_major};_minor=${_minor};_patch=${_patch};\
@@ -919,7 +919,7 @@ _prerelease=${_prerelease};_build=${build}"
    .done
 
    RVAL="${parsed_versions}"
-   return $rval
+   return $rc
 }
 
 
@@ -1033,25 +1033,25 @@ semver::parse::main()
    versions="${RVAL}"
 
    semver::parse::parse_versions "${versions}" "${OPTION_QUIET}" "${OPTION_LENIENT}"
-   rval=$?
+   rc=$?
 
    parsed_versions="${RVAL}"
 
    if [ "${OPTION_QUIET}" = 'YES' -o -z "${parsed_versions}" ]
    then
-      return $rval
+      return $rc
    fi
 
    if [ "${OPTION_RAW}" = 'YES' ]
    then
       printf "%s\n" "${parsed_versions}"
-      return $rval
+      return $rc
    fi
 
    semver::parse::parsed_versions_decriptions "${parsed_versions}" "${OPTION_PRETTY}"
 
    printf "%s\n" "${RVAL}"
-   return $rval
+   return $rc
 }
 
 
@@ -1118,7 +1118,7 @@ semver::parse::compare_main()
    local b_patch="${_patch}"
    local b_prerelease="${_prerelease}"
 
-   local rval
+   local rc
 
    semver::parse::compare_parsed \
        "${a_major}" "${a_minor}" "${a_patch}" "${a_prerelease}" \

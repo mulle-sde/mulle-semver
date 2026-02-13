@@ -107,10 +107,10 @@ semver::sort::_r_qsort_12()
          #set +x
          semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                        "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
-         rval="$?"
+         rc="$?"
          #set -x
 
-         if [ $rval -eq ${_semver_sort_descending} ]
+         if [ $rc -eq ${_semver_sort_descending} ]
          then
             tmp="${_array[${lo}]}"
             _array[${lo}]="${_array[${hi}]}"
@@ -158,7 +158,7 @@ semver::sort::_r_qsort_partition()
    local i
    local j
    local tmp
-   local rval
+   local rc
 
    i=$((lo - 1))
    j=$((hi + 1))
@@ -179,11 +179,11 @@ semver::sort::_r_qsort_partition()
          _comparisons=$((_comparisons + 1))
          semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                        "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
-         rval=$?
+         rc=$?
          #set -x
 
          # while array[i] < array[ pivot]
-         if [ $rval -eq ${_semver_sort_ascending} ]
+         if [ $rc -eq ${_semver_sort_ascending} ]
          then
             continue
          fi
@@ -201,11 +201,11 @@ semver::sort::_r_qsort_partition()
          _comparisons=$((_comparisons + 1))
          semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                        "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
-         rval=$?
+         rc=$?
          #set -x
 
          # while array[j] > array[ pivot]
-         if [ $rval -eq ${_semver_sort_descending} ]
+         if [ $rc -eq ${_semver_sort_descending} ]
          then
             continue
          fi
@@ -301,7 +301,7 @@ semver::sort::_r_mergesort_012()
       2)
 
          local tmp
-         local rval
+         local rc
          local line
 
          _a_line=
@@ -323,10 +323,10 @@ semver::sort::_r_mergesort_012()
          # set +x
          semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                        "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
-         rval="$?"
+         rc="$?"
          # set -x
 
-         if [ $rval -eq ${_semver_sort_descending} ]
+         if [ $rc -eq ${_semver_sort_descending} ]
          then
             r_add_line "${_b_line}" "${_a_line}"
          else
@@ -413,7 +413,7 @@ semver::sort::_r_mergesort()
    [ ${#a_array[@]} -eq ${m} ] || _internal_fail "failed assumption about A (${#a_array[@]} vs ${m})"
 
    local k
-   local rval
+   local rc
    declare -a result
 
    #set -x
@@ -470,10 +470,10 @@ semver::sort::_r_mergesort()
       #set +x
       semver::parse::compare_parsed "${_a_major}" "${_a_minor}" "${_a_patch}" "${_a_prerelease}" \
                                     "${_b_major}" "${_b_minor}" "${_b_patch}" "${_b_prerelease}"
-      rval=$?
+      rc=$?
       #set -x
 
-      if [ $rval -ne ${_semver_sort_descending} ]
+      if [ $rc -ne ${_semver_sort_descending} ]
       then
 #         [ -z "${_a_line}" ] && _internal_fail "failed assumption for _a_line"
          result[${k}]="${_a_line}"

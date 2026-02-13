@@ -26,9 +26,9 @@ DESCENDING=62
 expect()
 {
    local expect="$1"
-   local rval="$2"
+   local rc="$2"
 
-   if [ "${rval}" != "${expect}" ]
+   if [ "${rc}" != "${expect}" ]
    then
       echo "Expected $1 but got $2"
       exit 1
