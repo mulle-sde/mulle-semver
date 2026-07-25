@@ -19,3 +19,4 @@ version.old
 .mulle/etc/project/publisher-info.sh
 dox.unreleased
 .mulle/etc/make/build-dir
+.roam/

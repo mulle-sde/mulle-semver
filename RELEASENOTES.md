@@ -1,39 +1,3 @@
 ### 1.0.7
 
-
-
-
-
-
-
-* need to update `cmake_minimum_required` because cmake has a weird concept of min required
-
-### 1.0.6
-
 Various small improvements
-
-### 1.0.5
-
-Various small improvements
-
-### 1.0.4
-
-* Various small improvements
-
-### 1.0.2
-
-* Various small improvements
-
-### 1.0.1
-
-* Various small improvements
-
-# 1.0.0
-
-* big function rename to `<tool>`::`<file>`::`<function>` to make it easier to read hopefully
-* wrote a lot of tests, fixed a lot of bugs
-
-
-### 0.0.1
-
-* initial commit
