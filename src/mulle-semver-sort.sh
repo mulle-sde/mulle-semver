@@ -302,7 +302,6 @@ semver::sort::_r_mergesort_012()
 
          local tmp
          local rc
-         local line
 
          _a_line=
          for line in ${array}
