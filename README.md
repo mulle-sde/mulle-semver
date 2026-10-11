@@ -13,7 +13,7 @@ as a standalone tool, but as a library for
 
 | Release Version                                       | Release Notes
 |-------------------------------------------------------|--------------
-| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/srcS/mulle-semver.svg)  | [RELEASENOTES](RELEASENOTES.md) |
+| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/mulle-sde/mulle-semver.svg)  | [RELEASENOTES](RELEASENOTES.md) |
 
 
 
@@ -95,7 +95,7 @@ The command to install only the latest mulle-semver into
 `/usr/local` (with **sudo**) is:
 
 ``` bash
-curl -L 'https://github.com/srcS/mulle-semver/archive/latest.tar.gz' \
+curl -L 'https://github.com/mulle-sde/mulle-semver/archive/latest.tar.gz' \
  | tar xfz - && cd 'mulle-semver-latest' && sudo ./bin/installer /usr/local
 ```
 
