@@ -84,6 +84,45 @@ highest version that fits the qualifier.
 
 
 
+## Add
+
+
+
+
+
+### Add  as a cmake subproject
+
+In your code include its header:
+
+``` c
+#include </.h>
+```
+
+Add  and dependencies as git submodules and link against
+them:
+
+``` bash
+git submodule add -f --name "" \
+                        "https://github.com//" \
+                        "stash/"
+git submodule update --init --recursive
+```
+
+``` cmake
+include_directories( SYSTEM "${CMAKE_BINARY_DIR}/include")
+
+add_subdirectory( stash/)
+add_subdirectory( stash/)
+
+target_link_libraries( ${PROJECT_NAME} PUBLIC )
+target_link_libraries( ${PROJECT_NAME} PUBLIC )
+```
+
+Or let [mulle-sde](//github.com/mulle-sde) do it:
+
+``` sh
+mulle-sde add github:/
+```
 
 ## Install
 

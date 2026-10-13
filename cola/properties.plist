@@ -4,6 +4,7 @@
       description="📍 semantic versioning tool";
       domain="github";
       name="mulle-semver";
+      version="1.0.9";
       username="mulle-sde";
       reponame="mulle-semver";
       homepage="https://github.com/mulle-sde/mulle-semver";
